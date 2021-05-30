@@ -6,6 +6,15 @@
 import { request, service } from '../utils/request'
 import { ElMessage } from 'element-plus'
 
+const CODE = {
+  SUCCESS: 200, // 成功
+  PARAM_ERROR: 10001, // 参数错误
+  ACCOUNT_ERROR: 20001, // 账号或密码错误
+  LOGIN_ERROR: 30001, // 用户未登录
+  BUSINESS_ERROR: 40001, // 业务请求失败
+  AUTH_ERROR: 50001, // 认证失败或过期
+}
+
 // 约定的 code 提示信息
 const ERROR_MESSAGE = {
   '50001': '认证失效，请重新登录！'
@@ -42,7 +51,12 @@ service.interceptors.response.use(
 
 // 导出项目的请求 API 集合对象
 export default {
-  // 用户登录
+  /**
+   * @param {String} userName 
+   * @param {String} userPwd 
+   * @returns {Promise} Promise
+   * @description POST 提交用户登录请求
+   */
   login(userName, userPwd) {
     if (userName && userPwd) {
       return request.post('/api/login', { userName, userPwd })

@@ -1,5 +1,9 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+// 引入路由
+import router from '@/router'
+// 引入 vuex
+import store from '@/store'
 
 // 引入 Normalize.css 统一样式
 import 'normalize.css'
@@ -21,4 +25,6 @@ app.config.globalProperties.$requset = request
 app.config.globalProperties.$api = api
 
 app.use(ElementPlus)
+app.use(router)
+app.use(store)
 app.mount('#app')

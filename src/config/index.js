@@ -10,13 +10,13 @@ const env = import.meta.env.MODE || 'development'
 
 // 不同环境配置
 const envconfig = {
-  dev: {
+  development: {
     baseAPI: '/',
   },
   test: {
     baseAPI: '/test.website.com/api',
   },
-  prod: {
+  production: {
     baseAPI: '/website.com/api',
   },
 }
