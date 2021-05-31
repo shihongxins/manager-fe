@@ -11,7 +11,7 @@ const env = import.meta.env.MODE || 'development'
 // 不同环境配置
 const envconfig = {
   development: {
-    baseAPI: '/',
+    baseAPI: '/api',
   },
   test: {
     baseAPI: '/test.website.com/api',
@@ -25,6 +25,6 @@ export default {
   namespace: 'manager',
   env,
   ...envconfig[env],
-  mock: true,
+  mock: false, // 联调或正是上线时要改为 false ，request 去请求 baseAPI 
   mockAPI: 'https://www.fastmock.site/mock/bcae458fb84360a54496240b47bcbd42/manager'
 }

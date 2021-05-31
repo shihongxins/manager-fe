@@ -20,6 +20,18 @@ const ERROR_MESSAGE = {
   '50001': '认证失效，请重新登录！'
 }
 
+// axios 请求拦截器，打印请求配置查看
+service.interceptors.request.use(
+  (req) => {
+    console.log(req)
+    return req
+  },
+  // 拦截失败
+  (error) => {
+    ElMessage.error(error.message)
+  }
+)
+
 // axios 响应拦截器，进行响应数据判断
 service.interceptors.response.use(
   (res) => {
@@ -59,7 +71,7 @@ export default {
    */
   login(userName, userPwd) {
     if (userName && userPwd) {
-      return request.post('/api/login', { userName, userPwd })
+      return request.post('/users/login', { userName, userPwd })
     } else {
       ElMessage.warning('请填写用户名和账号')
     }

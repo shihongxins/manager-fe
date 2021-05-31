@@ -60,12 +60,17 @@ export default {
           // 验证通过，调用根实例上挂载的 api 集合方法
           this.$api.login(this.userInfo.userName, this.userInfo.userPwd)
             .then((data) => {
-              if (data.userId) {
+              if (data && data.userName) {
                 // 保存用户信息
                 this.$store.commit('saveUserInfo', data)
                 //跳转到首页
                 this.$router.push({ name: 'Home' })
+              } else {
+                throw new Error("登录失败！")
               }
+            }).catch((err) => {
+              this.$message.error(err.message)
+              this.onLogin = false
             })
         }
       })

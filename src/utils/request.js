@@ -9,7 +9,7 @@ import envconfig from '../config'
 // 创建 axios 实例，设置全局配置
 const service = axios.create({
   // 根据不同运行环境，全局设置默认 axios 实例的基础 URL
-  baseURL: envconfig.env==='production' ? envconfig.baseAPI : envconfig.mockAPI,
+  baseURL: envconfig.mock ? envconfig.mockAPI : envconfig.baseAPI,
   timeout: 8000
 })
 
@@ -21,7 +21,6 @@ const service = axios.create({
  */
 function request(config) {
   config = config || {}
-  console.log(config)
   // 未设置请求方式，默认发送 get 请求
   config.method = String(config.method || 'get').toLocaleLowerCase()
   // 如果是 get 请求，且没有 config.params 参数的话
