@@ -27,7 +27,21 @@ const routes = [
     name: 'Home',
     path: '/',
     alias: '/home',
-    component: Home
+    component: Home,
+    redirect: '/welcome',
+    meta: {
+      title: '首页'
+    },
+    children: [
+      {
+        name: 'Welcome',
+        path: 'welcome',
+        component: () => import('../views/welcome/Welcome.vue'),
+        meta: {
+          title: '欢迎使用'
+        }
+      }
+    ]
   }
 ]
 

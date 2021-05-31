@@ -69,11 +69,38 @@ export default {
    * @returns {Promise} Promise
    * @description POST 提交用户登录请求
    */
-  login(userName, userPwd) {
-    if (userName && userPwd) {
-      return request.post('/users/login', { userName, userPwd })
-    } else {
-      ElMessage.warning('请填写用户名和账号')
+  async login(userName, userPwd) {
+    let userInfo = {}
+    try {
+      if (userName && userPwd) {
+        userInfo = await request.post('/users/login', { userName, userPwd })
+      } else {
+        ElMessage.warning('请填写用户名和密码')
+      }
+    } catch (e) {
+      console.error(e)
+      ElMessage.error('登录出错！')
     }
+    return userInfo
+  },
+  async getNoticeCount() {
+    let count = 0;
+    try {
+      count = await request.get('/leave/count')
+    } catch (e) {
+      console.error(e)
+      ElMessage.error('查询通知出错！')
+    }
+    return count
+  },
+  async getMenuList() {
+    let list = [];
+    try {
+      list = await request.get('/menu/list')
+    } catch (e) {
+      console.error(e)
+      ElMessage.error('获取菜单列表出错！')
+    }
+    return list
   }
 }

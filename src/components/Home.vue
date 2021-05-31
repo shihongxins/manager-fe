@@ -1,44 +1,63 @@
 <template>
   <div class="layout">
     <el-container>
-      <el-aside class="layout-left">
+      <!-- 左侧边栏 -->
+      <el-aside class="layout-left" :width="''" :class="{collapsed: menuCollapsed}">
         <div class="logo">
           <img src="../assets/logo.png" alt="logo" class="logo_img">
           <h2 class="logo_title">Manager</h2>
         </div>
+        <!-- 使用自定义封装的递归树形菜单（菜单容器无需递归） -->
         <el-menu
           background-color="#545c64"
           text-color="#fff"
           active-text-color="#ffd04b"
+          :collapse="menuCollapsed"
+          router
         >
-          <el-submenu index="1">
-            <template #title>
-              <i class="el-icon-location"></i>
-              <span>导航一</span>
-            </template>
-            <el-menu-item index="1-1">选项1</el-menu-item>
-            <el-submenu index="1-2">
-              <template #title>选项2</template>
-              <el-menu-item index="1-2-1">选项2-1</el-menu-item>
-            </el-submenu>
-          </el-submenu>
-          <el-menu-item index="2">
-            <i class="el-icon-menu"></i>
-            <template #title>导航二</template>
-          </el-menu-item>
-          <el-menu-item index="3" disabled>
-            <i class="el-icon-document"></i>
-            <template #title>导航三</template>
-          </el-menu-item>
-          <el-menu-item index="4">
-            <i class="el-icon-setting"></i>
-            <template #title>导航四</template>
-          </el-menu-item>
+          <TreeMenu :menuList="menuList" />
         </el-menu>
       </el-aside>
+      <!-- 右边内容区 -->
       <el-container class="layout-right">
-        <el-header></el-header>
-        <el-main>
+        <!-- 头部 -->
+        <el-header>
+          <div class="header_container">
+            <div class="header-left">
+              <!-- 侧边栏伸缩按钮 -->
+              <el-button type="text" class="menu_btn" @click="handleMenuFoldClick">
+                <i :class="menuCollapsed ? 'el-icon-s-unfold' : 'el-icon-s-fold'"></i>
+              </el-button>
+              <!-- 面包屑导航 -->
+              <el-breadcrumb separator-class="el-icon-arrow-right">
+                <el-breadcrumb-item
+                  v-for="route in breadCrumb"
+                  :key="route.name"
+                  :to="{ path: route.path }">{{route.meta.title}}</el-breadcrumb-item>
+              </el-breadcrumb>
+            </div>
+            <div class="header-right">
+              <!-- 通知 -->
+              <div class="notice">
+                <el-badge :is-dot="(!!noticeCount)" type="danger">
+                  <i class="el-icon-bell"></i>
+                </el-badge>
+              </div>
+              <!-- 用户功能区 -->
+              <el-dropdown class="user" @command="handleUserCommand">
+                <el-avatar class="user_avatar">user</el-avatar>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="email" disabled>个人信息</el-dropdown-item>
+                    <el-dropdown-item command="logout" divided>退出</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+          </div>
+        </el-header>
+        <!-- 主内容区 -->
+        <el-main class="main">
           <router-view></router-view>
         </el-main>
       </el-container>
@@ -47,38 +66,127 @@
 </template>
 
 <script>
+// 引入自定义封装的递归树形菜单
+import TreeMenu from './TreeMenu.vue'
+
 export default {
   name: "Home",
-};
+  components: {
+    TreeMenu
+  },
+  data () {
+    return {
+      noticeCount: 0,
+      menuCollapsed: false,
+      menuList: [],
+    }
+  },
+  computed: {
+    breadCrumb () {
+      return this.$route.matched || [] 
+    }
+  },
+  mounted () {
+    this.getNoticeCount()
+    this.getMenuList()
+  },
+  methods: {
+    getNoticeCount () {
+      this.$api.getNoticeCount().then((cnt) => {
+        if (cnt !== undefined) {
+          this.noticeCount = cnt
+        }
+      })
+    },
+    getMenuList () {
+      this.$api.getMenuList().then((list) => {
+        if (list.length) {
+          this.menuList = list
+        }
+      })
+    },
+    handleMenuFoldClick () {
+      this.menuCollapsed = !this.menuCollapsed
+    },
+    handleUserCommand (command) {
+      if (command === 'logout') {
+        this.$store.commit('clearUserInfo')
+        this.$router.push({ name: 'Login' })
+      }
+    }
+  },
+}
 </script>
 
 <style lang="scss">
 .layout {
   &-left {
+    width: 200px;
     height: 100vh;
-    overflow-y: auto;
+    overflow: hidden auto !important;
     color: #fff;
     background: #545c64;
+    transition: width .5s;
     .logo {
       display: flex;
       justify-content: center;
       align-items: center;
+      height: 56px;
       &_img {
         width: 32px;
         height: 32px;
       }
       &_title {
         margin: 0 10px;
-        line-height: 56px;
         font-size: 20px;
       }
     }
     .el-menu {
       border-color: #545c64;
     }
+    // 侧边栏折叠时
+    &.collapsed {
+      width: 65px;
+      .logo_title {
+        display: none;
+      }
+    }
   }
   &-right {
     height: 100vh;
+    .main {
+      background: #eee;
+      > * {
+        overflow: auto;
+        background: #fff;
+      }
+    }
+    .header_container {
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      .header-left {
+        display: flex;
+        align-items: center;
+        .menu_btn {
+          padding-right: 20px;
+          font-size: 20px;
+          color: #333;
+        }
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        .notice {
+          padding: 12px 20px;
+        }
+        .user {
+          &_avatar {
+            cursor: pointer;
+          }
+        }
+      }
+    }
   }
 }
 </style>

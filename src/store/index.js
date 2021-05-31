@@ -14,6 +14,10 @@ export default createStore({
       } else {
         console.log('用户信息不能为空！', userInfo)
       }
+    },
+    clearUserInfo (state) {
+      state.userInfo = {}
+      storeage.removeItem('userInfo')
     }
   }
 })
