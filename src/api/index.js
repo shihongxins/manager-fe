@@ -5,6 +5,7 @@
  */
 import { request, service } from '../utils/request'
 import { ElMessage } from 'element-plus'
+import storage from '../utils/storage'
 
 const CODE = {
   SUCCESS: 200, // 成功
@@ -20,10 +21,12 @@ const ERROR_MESSAGE = {
   '50001': '认证失效，请重新登录！'
 }
 
-// axios 请求拦截器，打印请求配置查看
+// axios 请求拦截器
 service.interceptors.request.use(
   (req) => {
-    console.log(req)
+    // JWT 认证，每次发送 API 请求都会携带 token ，没有就转到登录页
+    const token = (storage.getItem('userInfo') || {}).token
+    req.headers.Authorization = `Bearer ${token}`
     return req
   },
   // 拦截失败
