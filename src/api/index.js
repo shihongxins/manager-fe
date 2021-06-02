@@ -89,7 +89,7 @@ export default {
   async getNoticeCount() {
     let count = 0;
     try {
-      count = await request.get('/leave/count')
+      count = await request.get('/leave/count', {}, { isMock: true})
     } catch (e) {
       console.error(e)
       ElMessage.error('查询通知出错！')
@@ -99,11 +99,65 @@ export default {
   async getMenuList() {
     let list = [];
     try {
-      list = await request.get('/menu/list')
+      list = await request.get('/menu/list', {}, { isMock: true})
     } catch (e) {
       console.error(e)
       ElMessage.error('获取菜单列表出错！')
     }
     return list
-  }
+  },
+  async getUserList(data) {
+    let list = [];
+    try {
+      list = await request.get('/users/list', data, { isMock: true})
+    } catch (e) {
+      console.error(e)
+      ElMessage.error('获取用户列表出错！')
+    }
+    return list
+  },
+  async userDel(userIds) {
+    let delCount = 0;
+    try {
+      delCount = await request.post('/users/delete', userIds, { isMock: true})
+    } catch (e) {
+      console.error(e)
+      ElMessage.error('删除用户出错！')
+    }
+    return delCount
+  },
+  async getRoleList() {
+    let list = [];
+    try {
+      list = await request.get('/roles/alllist', {}, { isMock: true})
+    } catch (e) {
+      console.error(e)
+      ElMessage.error('获取系统角色列表出错！')
+    }
+    return list
+  },
+  async getDeptList() {
+    let list = [];
+    try {
+      list = await request.get('/dept/list', {}, { isMock: true})
+    } catch (e) {
+      console.error(e)
+      ElMessage.error('获取部门列表出错！')
+    }
+    return list
+  },
+  async userOperate(userInfo) {
+    let res = false;
+    try {
+      const data = await request.post('/users/operate', userInfo, { isMock: true})
+      if (data) {
+        res = true
+      }
+    } catch (e) {
+      console.error(e)
+      ElMessage.error(userInfo.title+'出错！')
+    }
+    return res
+  },
+
 }

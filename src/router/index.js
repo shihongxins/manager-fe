@@ -36,9 +36,17 @@ const routes = [
       {
         name: 'Welcome',
         path: 'welcome',
-        component: () => import('../views/welcome/Welcome.vue'),
+        component: () => import('views/welcome/Welcome.vue'),
         meta: {
           title: '欢迎使用'
+        }
+      },
+      {
+        name: 'Users',
+        path: 'system/user',
+        component: () => import('views/users/Users.vue'),
+        meta: {
+          title: '用户管理'
         }
       }
     ]

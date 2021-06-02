@@ -25,6 +25,7 @@ export default {
   namespace: 'manager',
   env,
   ...envconfig[env],
-  mock: false, // 联调或正是上线时要改为 false ，request 去请求 baseAPI 
+  // 联调或正式上线时要改为 false ，request 去请求 baseAPI （当实现部分功能的时候也可关闭mock，在指定的请求中单独配置 mock）
+  mock: false,
   mockAPI: 'https://www.fastmock.site/mock/bcae458fb84360a54496240b47bcbd42/manager'
 }

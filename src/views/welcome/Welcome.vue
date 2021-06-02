@@ -18,6 +18,7 @@
 <style lang="scss">
 .welcome {
   height: 100%;
+  background: #fff;
   display: flex;
   justify-content: center;
   align-items: center;

@@ -156,10 +156,6 @@ export default {
     height: 100vh;
     .main {
       background: #eee;
-      > * {
-        overflow: auto;
-        background: #fff;
-      }
     }
     .header_container {
       height: 100%;
