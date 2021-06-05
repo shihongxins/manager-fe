@@ -6,6 +6,7 @@
 import { request, service } from '../utils/request'
 import { ElMessage } from 'element-plus'
 import storage from '../utils/storage'
+import router from '@/router'
 
 const CODE = {
   SUCCESS: 200, // 成功
@@ -18,6 +19,10 @@ const CODE = {
 
 // 约定的 code 提示信息
 const ERROR_MESSAGE = {
+  '10001': '缺少参数，或参数不合法！',
+  '20001': '账号或密码错误！',
+  '30001': '用户未登录，请先登录',
+  '40001': '业务请求失败',
   '50001': '认证失效，请重新登录！'
 }
 
@@ -50,6 +55,13 @@ service.interceptors.response.use(
         } else {
           // 校验不通过，根据约定的 code 提示信息
           ElMessage.error((ERROR_MESSAGE[result.code] || "返回数据格式有误！"))
+          // 未登录或登录超时，2 秒后跳转到登录页
+          if (result && (result.code == '30001' || result.code == '50001')) {
+            setTimeout(() => {
+              storage.removeItem('userInfo')
+              router.push({ name: 'Login' })
+            }, 2000)
+          }
         }
       } else {
         ElMessage.error('没有返回信息！');
@@ -109,7 +121,7 @@ export default {
   async getUserList(data) {
     let list = [];
     try {
-      list = await request.get('/users/list', data, { isMock: true})
+      list = await request.get('/users/list', data)
     } catch (e) {
       console.error(e)
       ElMessage.error('获取用户列表出错！')
@@ -119,12 +131,25 @@ export default {
   async userDel(userIds) {
     let delCount = 0;
     try {
-      delCount = await request.post('/users/delete', userIds, { isMock: true})
+      delCount = await request.post('/users/delete', userIds, { isMock: false})
     } catch (e) {
       console.error(e)
       ElMessage.error('删除用户出错！')
     }
     return delCount
+  },
+  async userOperate(userInfo) {
+    let res = false;
+    try {
+      const data = await request.post('/users/operate', userInfo, { isMock: false})
+      if (data) {
+        res = true
+      }
+    } catch (e) {
+      console.error(e)
+      ElMessage.error(userInfo.title+'出错！')
+    }
+    return res
   },
   async getRoleList() {
     let list = [];
@@ -146,18 +171,4 @@ export default {
     }
     return list
   },
-  async userOperate(userInfo) {
-    let res = false;
-    try {
-      const data = await request.post('/users/operate', userInfo, { isMock: true})
-      if (data) {
-        res = true
-      }
-    } catch (e) {
-      console.error(e)
-      ElMessage.error(userInfo.title+'出错！')
-    }
-    return res
-  },
-
 }

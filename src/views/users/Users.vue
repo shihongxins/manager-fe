@@ -1,20 +1,20 @@
 <template>
   <div class="users">
     <div class="form_wrapper">
-      <el-form :inline="true" :model="query">
-        <el-form-item label="用户 ID">
+      <el-form :inline="true" :model="query" ref="queryForm">
+        <el-form-item label="用户 ID" prop="userId">
           <el-input
             v-model="query.userId"
             placeholder="请输入用户 ID"
           ></el-input>
         </el-form-item>
-        <el-form-item label="用户名称">
+        <el-form-item label="用户名称" prop="userName">
           <el-input
             v-model="query.userName"
             placeholder="请输入用户名称"
           ></el-input>
         </el-form-item>
-        <el-form-item label="用户状态">
+        <el-form-item label="用户状态" prop="state">
           <el-select v-model="query.state" placeholder="请选择用户状态">
             <el-option label="所有" :value="0"></el-option>
             <el-option label="试用" :value="1"></el-option>
@@ -24,8 +24,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleQuerySubmit">查询</el-button>
-          <el-button native-type="reset" @click="handleQuerySubmit"
-            >重置</el-button
+          <el-button @click="handleQuerySubmit({reset: true})">重置</el-button
           >
         </el-form-item>
       </el-form>
@@ -70,14 +69,14 @@
           </el-table-column>
         </el-table>
         <el-pagination
-          class="table_pagination"
-          @size-change="handleQuerySubmit"
-          @current-change="handleQuerySubmit"
+          @size-change="(pageSize) => { handleQuerySubmit({ pageSize }) }"
+          @current-change="(pageNum) => { handleQuerySubmit({ pageNum }) }"
           v-model:current-page="pageData.pageNum"
           :page-sizes="[10, 20, 50, 100]"
           v-model:page-size="pageData.pageSize"
-          layout="total, sizes, prev, pager, next, jumper"
           :total="pageData.total"
+          class="table_pagination"
+          layout="total, sizes, prev, pager, next, jumper"
           background
         >
         </el-pagination>
@@ -90,6 +89,7 @@
 <script>
 import { getCurrentInstance, onMounted, reactive, ref } from "vue";
 import UserOperateDialog from './components/UserOperateDialog.vue';
+import utils from '../../utils/utils.js';
 
 /**
  * @param {Object} ctx 页面实例对象
@@ -136,10 +136,16 @@ const useUserTableInitEffect = (ctx) => {
     {
       label: "注册时间",
       prop: "createTime",
+      formatter(row, column, value) {
+        return utils.formatterDateTime(value)
+      }
     },
     {
       label: "最后登录时间",
       prop: "lastLoginTime",
+      formatter(row, column, value) {
+        return utils.formatterDateTime(value)
+      }
     },
   ];
   // 表格数据
@@ -166,8 +172,13 @@ const useUserTableInitEffect = (ctx) => {
     }
   };
   // 查询、重置查询数据方法
-  const handleQuerySubmit = () => {
-    pageData.pageNum = 1;
+  const handleQuerySubmit = (options) => {
+    const { reset, pageNum, pageSize } = options
+    if (reset) {
+      ctx.$refs.queryForm.resetFields()
+    }
+    pageData.pageNum = pageNum || 1;
+    pageData.pageSize = pageSize || 10;
     getUserList();
   };
   // （调用子组件的方法）弹出用户编辑弹窗
@@ -218,7 +229,7 @@ const useUserDeleteEffect = (ctx, getUserList) => {
   };
   // 用户单条数据删除
   const handleSingleDel = (row) => {
-    if (row && row.userId) {
+    if (row && row._id) {
       userDelete([row.userId]);
     }
   };
@@ -226,7 +237,7 @@ const useUserDeleteEffect = (ctx, getUserList) => {
   const handlePatchDel = () => {
     const userIds = [];
     userSelectedList.value.forEach((item) => {
-      if (item && item.userId) {
+      if (item && item._id) {
         userIds.push(item.userId);
       }
     });
