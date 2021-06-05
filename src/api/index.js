@@ -108,10 +108,10 @@ export default {
     }
     return count;
   },
-  async getMenuList() {
+  async getMenuList(data) {
     let list = [];
     try {
-      list = await request.get('/menu/list', {}, { isMock: true });
+      list = await request.get('/menu/list', data, { isMock: true });
     } catch (e) {
       console.error(e);
       ElMessage.error('获取菜单列表出错！');
@@ -119,14 +119,14 @@ export default {
     return list;
   },
   async getUserList(data) {
-    let list = [];
+    let res = {};
     try {
-      list = await request.get('/users/list', data);
+      res = await request.get('/users/list', data);
     } catch (e) {
       console.error(e);
       ElMessage.error('获取用户列表出错！');
     }
-    return list;
+    return res;
   },
   async userDel(userIds) {
     let delCount = 0;
@@ -170,5 +170,18 @@ export default {
       ElMessage.error('获取部门列表出错！');
     }
     return list;
+  },
+  async menuOperate(menuInfo) {
+    let res = false;
+    try {
+      const data = await request.post('/menu/operate', menuInfo, { isMock: true });
+      if (data) {
+        res = true;
+      }
+    } catch (e) {
+      console.error(e);
+      ElMessage.error(`${menuInfo.title}出错！`);
+    }
+    return res;
   },
 };

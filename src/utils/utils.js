@@ -31,7 +31,7 @@ export default {
       'M{2}': (`00${_datetime.getMonth() + 1}`).slice(-2),
       'M{1}': (_datetime.getMonth() + 1).toString(),
       'd{2}': (`00${_datetime.getDate()}`).slice(-2),
-      'H{2}': _datetime.getHours().toString(),
+      'H{2}': (`00${_datetime.getHours()}`).slice(-2),
       'm{2}': _datetime.getMinutes().toString(),
       'm{1}': _datetime.getMinutes().valueOf().toString(),
       's{2}': (`00${_datetime.getSeconds()}`).slice(-2),

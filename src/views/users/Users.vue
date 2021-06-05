@@ -1,6 +1,6 @@
 <template>
-  <div class="users">
-    <div class="form_wrapper">
+  <div class="content_wrapper">
+    <div class="query_form_wrapper">
       <el-form :inline="true" :model="query" ref="queryForm">
         <el-form-item label="用户 ID" prop="userId">
           <el-input
@@ -30,7 +30,7 @@
       </el-form>
     </div>
     <div class="table_container">
-      <div class="table_actions">
+      <div class="table_tools">
         <el-button
           type="primary"
           @click="showDialog(true, 'add')"
@@ -185,7 +185,7 @@ const useUserTableInitEffect = (ctx) => {
   };
   // （调用子组件的方法）弹出用户编辑弹窗
   const showDialog = (show, action, userInfo) => {
-    ctx.$refs.userOperateDialog.handleToggleShowUserDialog(show, action, userInfo);
+    ctx.$refs.userOperateDialog.handleToggleDialogShow(show, action, userInfo);
   };
   // 页面初始化的时候自动执行一次加载数据
   onMounted(() => {
@@ -287,11 +287,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss">
-.users {
-  height: 100%;
-  display: flex;
-  flex-flow: column;
-}
-</style>

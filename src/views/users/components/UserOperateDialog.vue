@@ -3,7 +3,7 @@
     <el-form
       :model="dialogData"
       :rules="dialogDataRules"
-      ref="userOperateForm"
+      ref="operateForm"
       label-position="right"
       label-width="6em"
     >
@@ -79,7 +79,7 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="handleToggleShowUserDialog(false)">取 消</el-button>
+      <el-button @click="handleToggleDialogShow(false)">取 消</el-button>
       <el-button type="primary" @click="handleSubmitUserOperate"
         >确 定</el-button
       >
@@ -122,7 +122,7 @@ const useUserOperateEffect = (ctx, getUserList) => {
     deptId: { trigger: 'blur', required: true, message: '请选择用户所属部门' },
   };
   // 弹窗的显隐状态切换方法
-  const handleToggleShowUserDialog = (show, action, userInfo) => {
+  const handleToggleDialogShow = (show, action, userInfo) => {
     // action 必须为新增或编辑，才能显示表单
     if (action === 'add' || action === 'edit') {
       dialogData.action = action;
@@ -133,7 +133,7 @@ const useUserOperateEffect = (ctx, getUserList) => {
     // ❗❗❗❗弹窗改变结束并操作完 DOM 后，再才执行下面的任务
     ctx.$nextTick(() => {
       // 清空弹窗的表单
-      ctx.$refs.userOperateForm.resetFields();
+      ctx.$refs.operateForm.resetFields();
       if (show && action === 'edit') {
         // 如果是打开编辑，重新填充默认值
         dialogData.userId = userInfo.userId;
@@ -150,7 +150,7 @@ const useUserOperateEffect = (ctx, getUserList) => {
   // 弹窗表单数据的提交
   const handleSubmitUserOperate = () => {
     // 提交前 校验表单
-    ctx.$refs.userOperateForm.validate(async (valid) => {
+    ctx.$refs.operateForm.validate(async (valid) => {
       if (valid) {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
         const data = toRaw(dialogData);
@@ -158,7 +158,7 @@ const useUserOperateEffect = (ctx, getUserList) => {
         const res = await ctx.$api.userOperate(data);
         if (res) {
           // 关闭弹窗
-          handleToggleShowUserDialog(false);
+          handleToggleDialogShow(false);
           // 重新加载表格
           getUserList();
           // 弹出提示
@@ -196,7 +196,7 @@ const useUserOperateEffect = (ctx, getUserList) => {
     dialogDataRules,
     roleList,
     deptList,
-    handleToggleShowUserDialog,
+    handleToggleDialogShow,
     handleSubmitUserOperate,
   };
 };
