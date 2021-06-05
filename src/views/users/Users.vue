@@ -87,9 +87,11 @@
 </template>
 
 <script>
-import { getCurrentInstance, onMounted, reactive, ref } from "vue";
+import {
+  getCurrentInstance, onMounted, reactive, ref,
+} from 'vue';
+import utils from '@/utils/utils';
 import UserOperateDialog from './components/UserOperateDialog.vue';
-import utils from '../../utils/utils.js';
 
 /**
  * @param {Object} ctx 页面实例对象
@@ -99,61 +101,61 @@ const useUserTableInitEffect = (ctx) => {
   // 表格展示列项
   const tableColumns = [
     {
-      label: "用户 ID",
-      prop: "userId",
+      label: '用户 ID',
+      prop: 'userId',
     },
     {
-      label: "用户名称",
-      prop: "userName",
+      label: '用户名称',
+      prop: 'userName',
     },
     {
-      label: "用户邮箱",
-      prop: "userEmail",
+      label: '用户邮箱',
+      prop: 'userEmail',
     },
     {
-      label: "用户角色",
-      prop: "role",
+      label: '用户角色',
+      prop: 'role',
       formatter(row, column, value) {
         const dictionary = {
-          0: "普通用户",
-          1: "管理员",
+          0: '普通用户',
+          1: '管理员',
         };
         return dictionary[value];
       },
     },
     {
-      label: "用户状态",
-      prop: "state",
+      label: '用户状态',
+      prop: 'state',
       formatter(row, column, value) {
         const dictionary = {
-          1: "试用",
-          2: "在职",
-          3: "离职",
+          1: '试用',
+          2: '在职',
+          3: '离职',
         };
         return dictionary[value];
       },
     },
     {
-      label: "注册时间",
-      prop: "createTime",
+      label: '注册时间',
+      prop: 'createTime',
       formatter(row, column, value) {
-        return utils.formatterDateTime(value)
-      }
+        return utils.formatterDateTime(value);
+      },
     },
     {
-      label: "最后登录时间",
-      prop: "lastLoginTime",
+      label: '最后登录时间',
+      prop: 'lastLoginTime',
       formatter(row, column, value) {
-        return utils.formatterDateTime(value)
-      }
+        return utils.formatterDateTime(value);
+      },
     },
   ];
   // 表格数据
   const userList = ref([]);
   // 表格数据查询字段
   const query = reactive({
-    userId: "",
-    userName: "",
+    userId: '',
+    userName: '',
     state: 0,
   });
   // 表格数据分页
@@ -173,18 +175,18 @@ const useUserTableInitEffect = (ctx) => {
   };
   // 查询、重置查询数据方法
   const handleQuerySubmit = (options) => {
-    const { reset, pageNum, pageSize } = options
+    const { reset, pageNum, pageSize } = options;
     if (reset) {
-      ctx.$refs.queryForm.resetFields()
+      ctx.$refs.queryForm.resetFields();
     }
     pageData.pageNum = pageNum || 1;
     pageData.pageSize = pageSize || 10;
     getUserList();
   };
   // （调用子组件的方法）弹出用户编辑弹窗
-  const showDialog = (show, action , userInfo) => {
-    ctx.$refs.userOperateDialog.handleToggleShowUserDialog(show,action,userInfo)
-  }
+  const showDialog = (show, action, userInfo) => {
+    ctx.$refs.userOperateDialog.handleToggleShowUserDialog(show, action, userInfo);
+  };
   // 页面初始化的时候自动执行一次加载数据
   onMounted(() => {
     getUserList();
@@ -196,7 +198,7 @@ const useUserTableInitEffect = (ctx) => {
     pageData,
     getUserList,
     handleQuerySubmit,
-    showDialog
+    showDialog,
   };
 };
 
@@ -218,13 +220,13 @@ const useUserDeleteEffect = (ctx, getUserList) => {
         userIds,
       });
       if (res && res.nModified > 0) {
-        ctx.$message.success("删除成功！");
+        ctx.$message.success('删除成功！');
         getUserList();
       } else {
-        ctx.$message.error("删除失败！");
+        ctx.$message.error('删除失败！');
       }
     } else {
-      ctx.$message.warning("请先选中数据！");
+      ctx.$message.warning('请先选中数据！');
     }
   };
   // 用户单条数据删除
@@ -253,15 +255,15 @@ const useUserDeleteEffect = (ctx, getUserList) => {
 };
 
 export default {
-  name: "Users",
+  name: 'Users',
   components: {
-    UserOperateDialog
+    UserOperateDialog,
   },
   setup() {
     // 获取页面实例，供其他逻辑使用
     const { ctx } = getCurrentInstance();
     // 调用 用户数据表格的初始化业务逻辑
-    //（它需要先解构的原因是，另外两个业务逻辑也要用到它内部的 getUserList 而不能再产生另外的作用域）
+    // （它需要先解构的原因是，另外两个业务逻辑也要用到它内部的 getUserList 而不能再产生另外的作用域）
     const {
       tableColumns,
       userList,
@@ -269,7 +271,7 @@ export default {
       pageData,
       getUserList,
       handleQuerySubmit,
-      showDialog
+      showDialog,
     } = useUserTableInitEffect(ctx);
     return {
       tableColumns,

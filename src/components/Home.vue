@@ -2,9 +2,13 @@
   <div class="layout">
     <el-container>
       <!-- 左侧边栏 -->
-      <el-aside class="layout-left" :width="''" :class="{collapsed: menuCollapsed}">
+      <el-aside
+        class="layout-left"
+        :width="''"
+        :class="{ collapsed: menuCollapsed }"
+      >
         <div class="logo">
-          <img src="../assets/logo.png" alt="logo" class="logo_img">
+          <img src="../assets/logo.png" alt="logo" class="logo_img" />
           <h2 class="logo_title">Manager</h2>
         </div>
         <!-- 使用自定义封装的递归树形菜单（菜单容器无需递归） -->
@@ -25,21 +29,29 @@
           <div class="header_container">
             <div class="header-left">
               <!-- 侧边栏伸缩按钮 -->
-              <el-button type="text" class="menu_btn" @click="handleMenuFoldClick">
-                <i :class="menuCollapsed ? 'el-icon-s-unfold' : 'el-icon-s-fold'"></i>
+              <el-button
+                type="text"
+                class="menu_btn"
+                @click="handleMenuFoldClick"
+              >
+                <i
+                  :class="menuCollapsed ? 'el-icon-s-unfold' : 'el-icon-s-fold'"
+                ></i>
               </el-button>
               <!-- 面包屑导航 -->
               <el-breadcrumb separator-class="el-icon-arrow-right">
                 <el-breadcrumb-item
                   v-for="route in breadCrumb"
                   :key="route.name"
-                  :to="{ path: route.path }">{{route.meta.title}}</el-breadcrumb-item>
+                  :to="{ path: route.path }"
+                  >{{ route.meta.title }}</el-breadcrumb-item
+                >
               </el-breadcrumb>
             </div>
             <div class="header-right">
               <!-- 通知 -->
               <div class="notice">
-                <el-badge :is-dot="(!!noticeCount)" type="danger">
+                <el-badge :is-dot="!!noticeCount" type="danger">
                   <i class="el-icon-bell"></i>
                 </el-badge>
               </div>
@@ -48,8 +60,12 @@
                 <el-avatar class="user_avatar">user</el-avatar>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="email" disabled>个人信息</el-dropdown-item>
-                    <el-dropdown-item command="logout" divided>退出</el-dropdown-item>
+                    <el-dropdown-item command="email" disabled
+                      >个人信息</el-dropdown-item
+                    >
+                    <el-dropdown-item command="logout" divided
+                      >退出</el-dropdown-item
+                    >
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -67,55 +83,55 @@
 
 <script>
 // 引入自定义封装的递归树形菜单
-import TreeMenu from './TreeMenu.vue'
+import TreeMenu from './TreeMenu.vue';
 
 export default {
-  name: "Home",
+  name: 'Home',
   components: {
-    TreeMenu
+    TreeMenu,
   },
-  data () {
+  data() {
     return {
       noticeCount: 0,
       menuCollapsed: false,
       menuList: [],
-    }
+    };
   },
   computed: {
-    breadCrumb () {
-      return this.$route.matched || [] 
-    }
+    breadCrumb() {
+      return this.$route.matched || [];
+    },
   },
-  mounted () {
-    this.getNoticeCount()
-    this.getMenuList()
+  mounted() {
+    this.getNoticeCount();
+    this.getMenuList();
   },
   methods: {
-    getNoticeCount () {
+    getNoticeCount() {
       this.$api.getNoticeCount().then((cnt) => {
         if (cnt !== undefined) {
-          this.noticeCount = cnt
+          this.noticeCount = cnt;
         }
-      })
+      });
     },
-    getMenuList () {
+    getMenuList() {
       this.$api.getMenuList().then((list) => {
         if (list.length) {
-          this.menuList = list
+          this.menuList = list;
         }
-      })
+      });
     },
-    handleMenuFoldClick () {
-      this.menuCollapsed = !this.menuCollapsed
+    handleMenuFoldClick() {
+      this.menuCollapsed = !this.menuCollapsed;
     },
-    handleUserCommand (command) {
+    handleUserCommand(command) {
       if (command === 'logout') {
-        this.$store.commit('clearUserInfo')
-        this.$router.push({ name: 'Login' })
+        this.$store.commit('clearUserInfo');
+        this.$router.push({ name: 'Login' });
       }
-    }
+    },
   },
-}
+};
 </script>
 
 <style lang="scss">
@@ -126,7 +142,7 @@ export default {
     overflow: hidden auto !important;
     color: #fff;
     background: #545c64;
-    transition: width .5s;
+    transition: width 0.5s;
     .logo {
       display: flex;
       justify-content: center;

@@ -88,7 +88,9 @@
 </template>
 
 <script>
-import { getCurrentInstance, reactive, ref, toRaw, onMounted } from "vue";
+import {
+  getCurrentInstance, reactive, ref, toRaw, onMounted,
+} from 'vue';
 
 /**
  * @param {Object} ctx 页面实例对象
@@ -99,32 +101,32 @@ const useUserOperateEffect = (ctx, getUserList) => {
   // 弹窗与弹窗表单的数据
   const dialogData = reactive({
     // 下面是弹窗的表单数据
-    userId: "",
-    userName: "",
-    userEmail: "",
-    mobile: "",
-    job: "",
+    userId: '',
+    userName: '',
+    userEmail: '',
+    mobile: '',
+    job: '',
     state: 1,
     roleList: [],
     deptId: [],
     // 下面是弹窗的属性数据
-    action: "add", // add: 新增, edit: 编辑
-    title: "新增用户",
+    action: 'add', // add: 新增, edit: 编辑
+    title: '新增用户',
     showDialog: false, // true 展示, false 隐藏
   });
   // 弹窗表单的数据校验规则
   const dialogDataRules = {
-    userName: { trigger: "blur", required: true, message: "请输入用户名称" },
-    userEmail: { trigger: "blur", required: true, message: "请输入用户邮箱" },
-    mobile: { trigger: "blur", pattern: /1[3-9]\d{9}/, message: "无效手机号" },
-    deptId: { trigger: "blur", required: true, message: "请选择用户所属部门" },
+    userName: { trigger: 'blur', required: true, message: '请输入用户名称' },
+    userEmail: { trigger: 'blur', required: true, message: '请输入用户邮箱' },
+    mobile: { trigger: 'blur', pattern: /1[3-9]\d{9}/, message: '无效手机号' },
+    deptId: { trigger: 'blur', required: true, message: '请选择用户所属部门' },
   };
   // 弹窗的显隐状态切换方法
   const handleToggleShowUserDialog = (show, action, userInfo) => {
     // action 必须为新增或编辑，才能显示表单
-    if (action === "add" || action === "edit") {
+    if (action === 'add' || action === 'edit') {
       dialogData.action = action;
-      dialogData.title = (action === "add" ? "新增" : "编辑") + "用户";
+      dialogData.title = `${action === 'add' ? '新增' : '编辑'}用户`;
     }
     // 改变弹窗显示状态
     dialogData.showDialog = show;
@@ -132,11 +134,11 @@ const useUserOperateEffect = (ctx, getUserList) => {
     ctx.$nextTick(() => {
       // 清空弹窗的表单
       ctx.$refs.userOperateForm.resetFields();
-      if (show && action === "edit") {
+      if (show && action === 'edit') {
         // 如果是打开编辑，重新填充默认值
         dialogData.userId = userInfo.userId;
         dialogData.userName = userInfo.userName;
-        dialogData.userEmail = userInfo.userEmail.split("@")[0];
+        dialogData.userEmail = userInfo.userEmail.split('@')[0];
         dialogData.mobile = userInfo.mobile;
         dialogData.job = userInfo.job;
         dialogData.state = userInfo.state;
@@ -152,7 +154,7 @@ const useUserOperateEffect = (ctx, getUserList) => {
       if (valid) {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
         const data = toRaw(dialogData);
-        data.userEmail += "@manager.com";
+        data.userEmail += '@manager.com';
         const res = await ctx.$api.userOperate(data);
         if (res) {
           // 关闭弹窗
@@ -160,9 +162,9 @@ const useUserOperateEffect = (ctx, getUserList) => {
           // 重新加载表格
           getUserList();
           // 弹出提示
-          ctx.$message.success(dialogData.title + "成功！");
+          ctx.$message.success(`${dialogData.title}成功！`);
         } else {
-          ctx.$message.warning(dialogData.title + "失败！");
+          ctx.$message.warning(`${dialogData.title}失败！`);
         }
       }
     });
@@ -200,7 +202,7 @@ const useUserOperateEffect = (ctx, getUserList) => {
 };
 
 export default {
-  name: "UserOperateDialog",
+  name: 'UserOperateDialog',
   props: {
     getUserList: {
       required: true,

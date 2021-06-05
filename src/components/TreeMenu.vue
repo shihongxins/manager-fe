@@ -19,12 +19,12 @@
 </template>
 <script>
 export default {
-  name: "TreeMenu",
+  name: 'TreeMenu',
   props: {
     menuList: {
       type: [Array, Object],
-      default: () => []
-    }
-  }
-}
+      default: () => [],
+    },
+  },
+};
 </script>

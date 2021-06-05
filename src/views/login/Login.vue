@@ -37,23 +37,23 @@
 
 <script>
 export default {
-  name: "Login",
-  data () {
+  name: 'Login',
+  data() {
     return {
       onLogin: false,
       userInfo: {
         userName: '',
-        userPwd: ''
+        userPwd: '',
       },
       rules: {
         userName: { required: true, message: '用户账号不能为空', trigger: 'blur' },
         userPwd: { required: true, message: '用户密码不能为空', trigger: 'blur' },
-      }
-    }
+      },
+    };
   },
   methods: {
-    login () {
-      this.onLogin = true
+    login() {
+      this.onLogin = true;
       // 再次进行表单验证
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
@@ -61,19 +61,19 @@ export default {
           this.$api.login(this.userInfo.userName, this.userInfo.userPwd).then((loginUser) => {
             if (loginUser && loginUser.userName) {
               // 保存用户信息
-              this.$store.commit('saveUserInfo', loginUser)
-              //跳转到首页
-              this.$router.push({ name: 'Home' })
+              this.$store.commit('saveUserInfo', loginUser);
+              // 跳转到首页
+              this.$router.push({ name: 'Home' });
             } else {
-              this.$message.error("登录失败！")
+              this.$message.error('登录失败！');
             }
-            this.onLogin = false
-          })
+            this.onLogin = false;
+          });
         }
-      })
-    }
-  }
-}
+      });
+    },
+  },
+};
 </script>
 
 <style lang="scss">

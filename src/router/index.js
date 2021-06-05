@@ -1,9 +1,9 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router';
 // 引入封装的 storage 对象
-import storage from '@/utils/storage'
+import storage from '@/utils/storage';
 
-import Login from 'views/login/Login.vue'
-import Home from 'components/Home.vue'
+import Login from 'views/login/Login.vue';
+import Home from 'components/Home.vue';
 
 const routes = [
   {
@@ -11,17 +11,17 @@ const routes = [
     path: '/login',
     component: Login,
     meta: {
-      title: '登录'
+      title: '登录',
     },
     beforeEnter: (to, from, next) => {
-      const isAuthorized = storage.getItem('userInfo')
+      const isAuthorized = storage.getItem('userInfo');
       // 已登录，不能重复打开登录页，因此转进入主页
       if (isAuthorized) {
-        next({ path: '/' })
+        next({ path: '/' });
       } else {
-        next()
+        next();
       }
-    }
+    },
   },
   {
     name: 'Home',
@@ -30,7 +30,7 @@ const routes = [
     component: Home,
     redirect: '/welcome',
     meta: {
-      title: '首页'
+      title: '首页',
     },
     children: [
       {
@@ -38,37 +38,37 @@ const routes = [
         path: 'welcome',
         component: () => import('views/welcome/Welcome.vue'),
         meta: {
-          title: '欢迎使用'
-        }
+          title: '欢迎使用',
+        },
       },
       {
         name: 'Users',
         path: 'system/user',
         component: () => import('views/users/Users.vue'),
         meta: {
-          title: '用户管理'
-        }
-      }
-    ]
-  }
-]
+          title: '用户管理',
+        },
+      },
+    ],
+  },
+];
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes
-})
+  routes,
+});
 
 // 前置守卫
 router.beforeEach((to, from, next) => {
-  const isAuthorized = storage.getItem('userInfo')
+  const isAuthorized = storage.getItem('userInfo');
   // 验证是否登录
   // 已登录或是去登录页，直接通过
   if (isAuthorized || to.path === '/login') {
-    next()
+    next();
   } else {
     // 未登录的情况下进入除登录页外的其他页面，都被拦截转到登录页
-    next({ path: '/login' })
+    next({ path: '/login' });
   }
-})
+});
 
-export default router
+export default router;
