@@ -151,10 +151,10 @@ export default {
     }
     return res;
   },
-  async getRoleList() {
+  async getRoleAllList() {
     let list = [];
     try {
-      list = await request.get('/roles/alllist', {}, { isMock: true });
+      list = await request.get('/role/alllist', {}, { isMock: true });
     } catch (e) {
       console.error(e);
       ElMessage.error('获取系统角色列表出错！');
@@ -181,6 +181,29 @@ export default {
     } catch (e) {
       console.error(e);
       ElMessage.error(`${menuInfo.title}出错！`);
+    }
+    return res;
+  },
+  async getRoleList(query) {
+    let list = [];
+    try {
+      list = await request.get('/role/list', query, { isMock: true });
+    } catch (e) {
+      console.error(e);
+      ElMessage.error('获取系统角色列表出错！');
+    }
+    return list;
+  },
+  async roleOperate(roleInfo) {
+    let res = false;
+    try {
+      const data = await request.post('/role/operate', roleInfo, { isMock: true });
+      if (data) {
+        res = true;
+      }
+    } catch (e) {
+      console.error(e);
+      ElMessage.error(`${roleInfo.title}出错！`);
     }
     return res;
   },

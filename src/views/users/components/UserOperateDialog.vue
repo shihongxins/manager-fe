@@ -172,8 +172,8 @@ const useUserOperateEffect = (ctx, getUserList) => {
   // 系统角色列表与部门列表的数据与加载方法。 TODO: 应该是一个系统级而非页面级方法，后续可能移到 HOME ，通过 vuex 交换
   const roleList = ref([]);
   const deptList = ref([]);
-  const getRoleList = async () => {
-    const list = await ctx.$api.getRoleList();
+  const getRoleAllList = async () => {
+    const list = await ctx.$api.getRoleAllList();
     if (list.length) {
       roleList.value = list;
     }
@@ -186,7 +186,7 @@ const useUserOperateEffect = (ctx, getUserList) => {
   };
   // 页面初始化的时候自动执行一次加载数据
   onMounted(() => {
-    getRoleList();
+    getRoleAllList();
     getDeptList();
   });
 

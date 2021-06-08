@@ -21,6 +21,7 @@ export default {
       timeScamp = datetime.getTime();
     } else {
       console.error('Invalid datetime');
+      return datetime;
     }
     const _datetime = new Date();
     _datetime.setTime(timeScamp);
@@ -32,7 +33,7 @@ export default {
       'M{1}': (_datetime.getMonth() + 1).toString(),
       'd{2}': (`00${_datetime.getDate()}`).slice(-2),
       'H{2}': (`00${_datetime.getHours()}`).slice(-2),
-      'm{2}': _datetime.getMinutes().toString(),
+      'm{2}': (`00${_datetime.getMinutes()}`).slice(-2),
       'm{1}': _datetime.getMinutes().valueOf().toString(),
       's{2}': (`00${_datetime.getSeconds()}`).slice(-2),
       '\\.(s|S)+': `.${(`000${_datetime.getMilliseconds()}`).slice(-3)}`,
