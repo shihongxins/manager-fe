@@ -58,6 +58,13 @@
           ></el-input>
         </el-form-item>
       </template>
+      <el-form-item v-else-if="dialogData.menuType===2" label="权限标识" prop="menuCode">
+        <el-input
+          v-model="dialogData.menuCode"
+          placeholder="请输入按钮权限标识"
+          autocomplete="off"
+        ></el-input>
+      </el-form-item>
       <el-form-item label="菜单状态" prop="menuState">
         <el-radio-group v-model="dialogData.menuState">
           <el-radio :label="0">停用</el-radio>
@@ -93,6 +100,7 @@ const useMenuOperateEffect = (ctx, getMenuList) => {
     path: '',
     compoent: '',
     menuState: 1,
+    menuCode: '',
     // 下面是弹窗的属性数据
     action: 'add', // add: 新增, edit: 编辑
     title: '新增菜单',
@@ -130,6 +138,7 @@ const useMenuOperateEffect = (ctx, getMenuList) => {
         }
         // 如果是编辑菜单，那么父级菜单不用修改，还需填入其他信息
         if (action === 'edit') {
+          dialogData._id = menuInfo._id;
           dialogData.parentId = menuInfo.parentId.filter((item) => item);
           dialogData.menuType = menuInfo.menuType;
           dialogData.menuName = menuInfo.menuName;
@@ -137,6 +146,7 @@ const useMenuOperateEffect = (ctx, getMenuList) => {
           dialogData.path = menuInfo.path;
           dialogData.compoent = menuInfo.compoent;
           dialogData.menuState = menuInfo.menuState;
+          dialogData.menuCode = menuInfo.menuCode;
         }
       }
     });
@@ -147,17 +157,17 @@ const useMenuOperateEffect = (ctx, getMenuList) => {
     ctx.$refs.operateForm.validate(async (valid) => {
       if (valid) {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
-        const data = toRaw(dialogData);
-        const res = await ctx.$api.menuOperate(data);
+        const menuInfo = toRaw(dialogData);
+        const res = await ctx.$api.menuOperate(menuInfo);
         if (res) {
           // 关闭弹窗
           handleToggleDialogShow(false);
           // 重新加载表格
           getMenuList();
           // 弹出提示
-          ctx.$message.success(`${dialogData.title}成功！`);
+          ctx.$message.success(`${dialogData.title} -> [${menuInfo.menuName}] 成功！`);
         } else {
-          ctx.$message.warning(`${dialogData.title}失败！`);
+          ctx.$message.warning(`${dialogData.title} -> [${menuInfo.menuName}] 失败！`);
         }
       }
     });

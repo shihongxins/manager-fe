@@ -171,6 +171,7 @@ const useMenuTableInitEffect = (ctx) => {
     if (row && row._id) {
       const res = await ctx.$api.menuOperate({
         _id: row._id,
+        menuName: row.menuName,
         action: 'delete',
       });
       if (res) {

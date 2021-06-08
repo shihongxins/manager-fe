@@ -53,8 +53,6 @@ service.interceptors.response.use(
           // 校验通过，直接返回纯数据
           return result.data;
         }
-        // 校验不通过，根据约定的 code 提示信息
-        ElMessage.error((ERROR_MESSAGE[result.code] || '返回数据格式有误！'));
         // 未登录或登录超时，2 秒后跳转到登录页
         if (result && (result.code === CODE.AUTH_ERROR || result.code === CODE.LOGIN_ERROR)) {
           setTimeout(() => {
@@ -62,6 +60,8 @@ service.interceptors.response.use(
             router.push({ name: 'Login' });
           }, 2000);
         }
+        // 校验不通过，根据约定的 code 提示信息
+        ElMessage.error((ERROR_MESSAGE[result.code] || '返回数据格式有误！'));
       } else {
         ElMessage.error('没有返回信息！');
       }
@@ -111,7 +111,7 @@ export default {
   async getMenuList(data) {
     let list = [];
     try {
-      list = await request.get('/menu/list', data, { isMock: true });
+      list = await request.get('/menu/list', data, { isMock: false });
     } catch (e) {
       console.error(e);
       ElMessage.error('获取菜单列表出错！');
@@ -174,7 +174,7 @@ export default {
   async menuOperate(menuInfo) {
     let res = false;
     try {
-      const data = await request.post('/menu/operate', menuInfo, { isMock: true });
+      const data = await request.post('/menu/operate', menuInfo, { isMock: false });
       if (data) {
         res = true;
       }
