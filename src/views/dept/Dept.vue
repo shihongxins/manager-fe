@@ -87,7 +87,8 @@ const useDeptTableInitEffect = (ctx) => {
     },
     {
       label: '负责人',
-      prop: 'userName',
+      prop: 'userInfo',
+      formatter: (row, column, userInfo) => ((userInfo && userInfo.userName) ? userInfo.userName : ''),
     },
     {
       label: '创建时间',

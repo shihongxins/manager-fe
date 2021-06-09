@@ -167,7 +167,7 @@ export default {
   async getDeptList(query) {
     let list = [];
     try {
-      list = await request.get('/dept/list', query, { isMock: true });
+      list = await request.get('/dept/list', query, { isMock: false });
     } catch (e) {
       console.error(e);
       ElMessage.error('获取部门列表出错！');
@@ -213,7 +213,7 @@ export default {
   async deptOperate(deptInfo) {
     let res = false;
     try {
-      const data = await request.post('/dept/operate', deptInfo, { isMock: true });
+      const data = await request.post('/dept/operate', deptInfo, { isMock: false });
       if (data.result > 0) {
         res = true;
       }

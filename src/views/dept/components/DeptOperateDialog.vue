@@ -43,7 +43,7 @@
       <el-form-item label="负责人邮箱" v-if="dialogData.userInfo">
         <el-input
           v-model="dialogData.userInfo.userEmail"
-          placeholder="请输入部门名称"
+          placeholder="负责人邮箱"
           autocomplete="off"
           disabled
         ></el-input>
