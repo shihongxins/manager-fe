@@ -118,10 +118,10 @@ export default {
     }
     return list;
   },
-  async getUserList(data) {
+  async getUserList(query) {
     let res = {};
     try {
-      res = await request.get('/users/list', data);
+      res = await request.get('/users/list', query);
     } catch (e) {
       console.error(e);
       ElMessage.error('获取用户列表出错！');
@@ -164,10 +164,10 @@ export default {
     }
     return list;
   },
-  async getDeptList() {
+  async getDeptList(query) {
     let list = [];
     try {
-      list = await request.get('/dept/list', {}, { isMock: true });
+      list = await request.get('/dept/list', query, { isMock: true });
     } catch (e) {
       console.error(e);
       ElMessage.error('获取部门列表出错！');
@@ -207,6 +207,19 @@ export default {
     } catch (e) {
       console.error(e);
       ElMessage.error(`${roleInfo.title}出错！`);
+    }
+    return res;
+  },
+  async deptOperate(deptInfo) {
+    let res = false;
+    try {
+      const data = await request.post('/dept/operate', deptInfo, { isMock: true });
+      if (data.result > 0) {
+        res = true;
+      }
+    } catch (e) {
+      console.error(e);
+      ElMessage.error(`${deptInfo.title}出错！`);
     }
     return res;
   },
