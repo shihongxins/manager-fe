@@ -70,7 +70,7 @@
         </el-pagination>
       </div>
     </div>
-    <RoleOperateDialog ref="roleOperateDialog" :getRoleList="getRoleList" />
+    <RoleOperateDialog ref="roleOperateDialog" :getRoleList="getRoleList" :menuList="menuList" />
   </div>
 </template>
 
@@ -98,11 +98,30 @@ const useRoleTableInitEffect = (ctx) => {
     },
     {
       label: '权限列表',
-      prop: 'menuList',
+      prop: 'rolePermission',
+      formatter(row, column, value) {
+        // 深度遍历菜单，返回页面名称
+        const deepMapMenu = (list = [], filter, res = []) => {
+          list.forEach((menu) => {
+            if (filter.indexOf(menu._id) > -1) {
+              res.push(menu.menuName);
+            }
+            if (menu.children && menu.children.length) {
+              deepMapMenu(menu.children, filter, res);
+            }
+          });
+        };
+        const resultArr = [];
+        if (value && value.checkedPages) {
+          // eslint-disable-next-line no-use-before-define
+          deepMapMenu(menuList.value, value.checkedPages, resultArr);
+        }
+        return resultArr.join(',').replace(/,$/, '');
+      },
     },
     {
-      label: '创建时间',
-      prop: 'createTime',
+      label: '更新时间',
+      prop: 'updateTime',
       formatter(row, column, value) {
         return utils.formatterDateTime(value);
       },
@@ -149,6 +168,7 @@ const useRoleTableInitEffect = (ctx) => {
     if (row && row._id) {
       const res = await ctx.$api.roleOperate({
         _id: row._id,
+        roleName: row.roleName,
         action: 'delete',
       });
       if (res) {
@@ -159,15 +179,26 @@ const useRoleTableInitEffect = (ctx) => {
       }
     }
   };
+  // 权限设置菜单列表
+  const menuList = ref([]);
+  // 加载表格数据的方法
+  const getMenuList = async () => {
+    const list = await ctx.$api.getMenuList();
+    if (list) {
+      menuList.value = list;
+    }
+  };
   // 页面初始化的时候自动执行一次加载数据
   onMounted(() => {
     getRoleList();
+    getMenuList();
   });
   return {
     tableColumns,
     roleList,
     query,
     pageData,
+    menuList,
     getRoleList,
     handleQuerySubmit,
     showDialog,

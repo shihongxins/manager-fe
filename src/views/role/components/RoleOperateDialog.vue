@@ -7,33 +7,31 @@
       label-position="right"
       label-width="6em"
     >
-      <template
-        v-if="dialogData.action == 'add' || dialogData.action == 'edit'"
+      <!-- 新增与编辑（roleName, remark） -->
+      <el-form-item label="角色名称" prop="roleName">
+        <el-input
+          v-model="dialogData.roleName"
+          placeholder="请输入角色名称"
+          autocomplete="off"
+          :disabled="dialogData.action === 'setPermission'"
+        ></el-input>
+      </el-form-item>
+      <el-form-item
+        label="备注"
+        prop="remark"
+        v-show="dialogData.action != 'setPermission'"
       >
-        <!-- 新增与编辑（roleName, remark） -->
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input
-            v-model="dialogData.roleName"
-            placeholder="请输入角色名称"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input
-            type="textarea"
-            v-model="dialogData.remark"
-            placeholder="请输入备注信息"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-      </template>
-      <template v-else-if="dialogData.action == 'setPermission'">
-        <!-- 权限设置(rightList) -->
-        <el-form-item label="角色名称">
-          <span>{{ dialogData.roleName }}</span>
-        </el-form-item>
+        <el-input
+          type="textarea"
+          v-model="dialogData.remark"
+          placeholder="请输入备注信息"
+          autocomplete="off"
+        ></el-input>
+      </el-form-item>
+      <template v-if="dialogData.action === 'setPermission'">
+        <!-- 权限设置 -->
         <el-divider></el-divider>
-        <el-form-item label="选择权限">
+        <el-form-item label="选择权限" prop="checkedBtns">
           <el-tree
             ref="menuTree"
             show-checkbox
@@ -41,7 +39,6 @@
             node-key="_id"
             :data="menuList"
             :props="{ children: 'children', label: 'menuName' }"
-            :default-checked-keys="dialogData.checkedBtns"
           ></el-tree>
         </el-form-item>
       </template>
@@ -57,7 +54,7 @@
 
 <script>
 import {
-  getCurrentInstance, reactive, toRaw, ref,
+  getCurrentInstance, reactive, toRaw,
 } from 'vue';
 
 /**
@@ -69,6 +66,7 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
   // 弹窗与弹窗表单的数据
   const dialogData = reactive({
     // 下面是弹窗的表单数据
+    _id: '',
     roleName: '',
     remark: '',
     checkedPages: [],
@@ -82,19 +80,13 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
   const dialogDataRules = {
     roleName: { trigger: 'blur', required: true, message: '请输入角色名称' },
   };
-  // 权限设置菜单列表
-  const menuList = ref([]);
-  // 加载表格数据的方法
-  const getMenuList = async () => {
-    const list = await ctx.$api.getMenuList();
-    if (list) {
-      menuList.value = list;
-    }
-  };
   // 弹窗的显隐状态切换方法
   const handleToggleDialogShow = (show, action, roleInfo) => {
     // action 必须为新增或编辑，才能显示表单
-    dialogData.action = action;
+    // ❗❗❗❗❗ 在显示之前不要修改任何除弹窗显示之外的任何 dialogData 字段，否则无法重置表单
+    if (action) {
+      dialogData.action = action;
+    }
     if (action === 'edit') {
       dialogData.title = '编辑角色';
     } else if (action === 'add') {
@@ -106,23 +98,24 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
     dialogData.showDialog = show;
     // ❗❗❗❗弹窗改变结束并操作完 DOM 后，再才执行下面的任务
     ctx.$nextTick(() => {
-      // 清空弹窗的表单
+      // 清空弹窗的表单 在显示之前不要修改任何除弹窗显示之外的任何 dialogData 字段，否则无法重置表单
       ctx.$refs.operateForm.resetFields();
       if (
         roleInfo !== undefined
         && (action === 'edit' || action === 'setPermission')
       ) {
         // 如果是编辑角色，还需填入其他信息
+        dialogData._id = roleInfo._id;
         dialogData.roleName = roleInfo.roleName;
         dialogData.remark = roleInfo.remark;
         // 设置权限，加载权限列表，并初始化选择
         if (action === 'setPermission') {
-          getMenuList();
-          if (roleInfo.permission) {
-            const { checkedPages, checkedBtns } = roleInfo.permission;
+          if (roleInfo.rolePermission) {
+            const { checkedPages, checkedBtns } = roleInfo.rolePermission;
             dialogData.checkedPages = checkedPages;
             dialogData.checkedBtns = checkedBtns;
           }
+          ctx.$refs.menuTree.setCheckedKeys(dialogData.checkedBtns);
         }
       }
     });
@@ -143,15 +136,22 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
           const checkedBtns = [];
           allCheckedMenu.forEach((item) => {
             if (item) {
-              if (item.menuType === 1) {
+              // 选中的页面
+              if (
+                item.menuType === 1
+                && item.children
+                && item.children.length
+                && item.children[0].menuType === 2
+              ) {
                 checkedPages.push(item._id);
               }
+              // 选中的按钮
               if (item.menuType === 2) {
                 checkedBtns.push(item._id);
               }
             }
           });
-          roleInfo.permission = { checkedPages, checkedBtns };
+          roleInfo.rolePermission = { checkedPages, checkedBtns };
         }
         const res = await ctx.$api.roleOperate(roleInfo);
         if (res) {
@@ -175,7 +175,6 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
   return {
     dialogData,
     dialogDataRules,
-    menuList,
     handleToggleDialogShow,
     handleSubmitRoleOperate,
   };
@@ -187,6 +186,10 @@ export default {
     getRoleList: {
       required: true,
       type: Function,
+    },
+    menuList: {
+      type: Array,
+      default: () => [],
     },
   },
   setup(props) {

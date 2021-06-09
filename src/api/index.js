@@ -61,7 +61,7 @@ service.interceptors.response.use(
           }, 2000);
         }
         // 校验不通过，根据约定的 code 提示信息
-        ElMessage.error((ERROR_MESSAGE[result.code] || '返回数据格式有误！'));
+        ElMessage.error((result.msg || ERROR_MESSAGE[result.code] || '返回数据格式有误！'));
       } else {
         ElMessage.error('没有返回信息！');
       }
@@ -131,7 +131,10 @@ export default {
   async userDel(userIds) {
     let delCount = 0;
     try {
-      delCount = await request.post('/users/delete', userIds, { isMock: false });
+      const data = await request.post('/users/delete', userIds, { isMock: false });
+      if (data.result > 0) {
+        delCount = data.result;
+      }
     } catch (e) {
       console.error(e);
       ElMessage.error('删除用户出错！');
@@ -142,7 +145,7 @@ export default {
     let res = false;
     try {
       const data = await request.post('/users/operate', userInfo, { isMock: false });
-      if (data) {
+      if (data.result > 0) {
         res = true;
       }
     } catch (e) {
@@ -175,7 +178,7 @@ export default {
     let res = false;
     try {
       const data = await request.post('/menu/operate', menuInfo, { isMock: false });
-      if (data) {
+      if (data.result > 0) {
         res = true;
       }
     } catch (e) {
@@ -187,7 +190,7 @@ export default {
   async getRoleList(query) {
     let list = [];
     try {
-      list = await request.get('/role/list', query, { isMock: true });
+      list = await request.get('/role/list', query, { isMock: false });
     } catch (e) {
       console.error(e);
       ElMessage.error('获取系统角色列表出错！');
@@ -197,8 +200,8 @@ export default {
   async roleOperate(roleInfo) {
     let res = false;
     try {
-      const data = await request.post('/role/operate', roleInfo, { isMock: true });
-      if (data) {
+      const data = await request.post('/role/operate', roleInfo, { isMock: false });
+      if (data.result > 0) {
         res = true;
       }
     } catch (e) {
