@@ -108,10 +108,10 @@ export default {
     }
     return count;
   },
-  async getMenuList(data) {
+  async getMenuList(query) {
     let list = [];
     try {
-      list = await request.get('/menu/list', data, { isMock: false });
+      list = await request.get('/menu/list', query);
     } catch (e) {
       console.error(e);
       ElMessage.error('获取菜单列表出错！');
@@ -131,9 +131,9 @@ export default {
   async userDel(userIds) {
     let delCount = 0;
     try {
-      const data = await request.post('/users/delete', userIds, { isMock: false });
-      if (data.result > 0) {
-        delCount = data.result;
+      const data = await request.post('/users/delete', userIds);
+      if (data && data.nModified > 0) {
+        delCount = data.deletedCount;
       }
     } catch (e) {
       console.error(e);
@@ -144,8 +144,8 @@ export default {
   async userOperate(userInfo) {
     let res = false;
     try {
-      const data = await request.post('/users/operate', userInfo, { isMock: false });
-      if (data.result > 0) {
+      const data = await request.post('/users/operate', userInfo);
+      if (data && (data.nModified > 0 || data._id)) {
         res = true;
       }
     } catch (e) {
@@ -157,7 +157,7 @@ export default {
   async getRoleAllList() {
     let list = [];
     try {
-      list = await request.get('/role/alllist', {}, { isMock: true });
+      list = await request.get('/role/alllist');
     } catch (e) {
       console.error(e);
       ElMessage.error('获取系统角色列表出错！');
@@ -167,7 +167,7 @@ export default {
   async getDeptList(query) {
     let list = [];
     try {
-      list = await request.get('/dept/list', query, { isMock: false });
+      list = await request.get('/dept/list', query);
     } catch (e) {
       console.error(e);
       ElMessage.error('获取部门列表出错！');
@@ -177,8 +177,8 @@ export default {
   async menuOperate(menuInfo) {
     let res = false;
     try {
-      const data = await request.post('/menu/operate', menuInfo, { isMock: false });
-      if (data.result > 0) {
+      const data = await request.post('/menu/operate', menuInfo);
+      if (data && (data.deletedCount > 0 || data.nModified > 0 || data._id)) {
         res = true;
       }
     } catch (e) {
@@ -190,7 +190,7 @@ export default {
   async getRoleList(query) {
     let list = [];
     try {
-      list = await request.get('/role/list', query, { isMock: false });
+      list = await request.get('/role/list', query);
     } catch (e) {
       console.error(e);
       ElMessage.error('获取系统角色列表出错！');
@@ -200,8 +200,8 @@ export default {
   async roleOperate(roleInfo) {
     let res = false;
     try {
-      const data = await request.post('/role/operate', roleInfo, { isMock: false });
-      if (data.result > 0) {
+      const data = await request.post('/role/operate', roleInfo);
+      if (data && (data.deletedCount > 0 || data.nModified > 0 || data._id)) {
         res = true;
       }
     } catch (e) {
@@ -213,8 +213,8 @@ export default {
   async deptOperate(deptInfo) {
     let res = false;
     try {
-      const data = await request.post('/dept/operate', deptInfo, { isMock: false });
-      if (data.result > 0) {
+      const data = await request.post('/dept/operate', deptInfo);
+      if (data && (data.deletedCount > 0 || data.nModified > 0 || data._id)) {
         res = true;
       }
     } catch (e) {

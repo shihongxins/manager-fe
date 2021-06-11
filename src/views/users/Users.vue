@@ -50,6 +50,7 @@
             :key="col.prop"
             :prop="col.prop"
             :label="col.label"
+            :width="col.width"
             :formatter="col.formatter"
           ></el-table-column>
           <el-table-column label="操作">
@@ -63,6 +64,7 @@
                 size="mini"
                 type="danger"
                 @click="handleSingleDel(scope.row)"
+                v-if="scope.row.role != 1"
                 >删除</el-button
               >
             </template>
@@ -103,6 +105,7 @@ const useUserTableInitEffect = (ctx) => {
     {
       label: '用户 ID',
       prop: 'userId',
+      width: 80,
     },
     {
       label: '用户名称',
@@ -111,6 +114,7 @@ const useUserTableInitEffect = (ctx) => {
     {
       label: '用户邮箱',
       prop: 'userEmail',
+      width: 200,
     },
     {
       label: '用户角色',
@@ -156,7 +160,7 @@ const useUserTableInitEffect = (ctx) => {
   const query = reactive({
     userId: '',
     userName: '',
-    state: 0,
+    state: 2,
   });
   // 表格数据分页
   const pageData = reactive({
@@ -216,10 +220,10 @@ const useUserDeleteEffect = (ctx, getUserList) => {
   // 根据用户 Id 删除用户（数组，可删除多个）的具体方法
   const userDelete = async (userIds) => {
     if (userIds.length > 0) {
-      const res = await ctx.$api.userDel({
+      const delCount = await ctx.$api.userDel({
         userIds,
       });
-      if (res && res.nModified > 0) {
+      if (delCount > 0) {
         ctx.$message.success('删除成功！');
         getUserList();
       } else {

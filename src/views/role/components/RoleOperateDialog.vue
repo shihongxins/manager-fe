@@ -154,7 +154,7 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
           roleInfo.rolePermission = { checkedPages, checkedBtns };
         }
         const res = await ctx.$api.roleOperate(roleInfo);
-        if (res) {
+        if (res === true) {
           // 关闭弹窗
           handleToggleDialogShow(false);
           // 重新加载表格

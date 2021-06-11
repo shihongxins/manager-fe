@@ -136,7 +136,7 @@ const useMenuTableInitEffect = (ctx) => {
       formatter(row, column, value) {
         return utils.formatterDateTime(value);
       },
-      width: '90px',
+      width: 90,
     },
   ];
   // 表格数据
@@ -174,7 +174,7 @@ const useMenuTableInitEffect = (ctx) => {
         menuName: row.menuName,
         action: 'delete',
       });
-      if (res) {
+      if (res === true) {
         ctx.$message.success('删除成功！');
         getMenuList();
       } else {

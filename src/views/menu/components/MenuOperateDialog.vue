@@ -159,7 +159,7 @@ const useMenuOperateEffect = (ctx, getMenuList) => {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
         const menuInfo = toRaw(dialogData);
         const res = await ctx.$api.menuOperate(menuInfo);
-        if (res) {
+        if (res === true) {
           // 关闭弹窗
           handleToggleDialogShow(false);
           // 重新加载表格

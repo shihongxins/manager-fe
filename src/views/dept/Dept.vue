@@ -139,7 +139,7 @@ const useDeptTableInitEffect = (ctx) => {
         deptName: row.deptName,
         action: 'delete',
       });
-      if (res) {
+      if (res === true) {
         ctx.$message.success('删除成功！');
         getDeptList();
       } else {

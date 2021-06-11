@@ -154,9 +154,9 @@ const useUserOperateEffect = (ctx, getUserList) => {
       if (valid) {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
         const data = toRaw(dialogData);
-        data.userEmail += '@manager.com';
+        data.userEmail = `${data.userEmail.split('@')[0]}@manager.com`;
         const res = await ctx.$api.userOperate(data);
-        if (res) {
+        if (res === true) {
           // 关闭弹窗
           handleToggleDialogShow(false);
           // 重新加载表格
