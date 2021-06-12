@@ -28,19 +28,17 @@
           autocomplete="off"
         ></el-input>
       </el-form-item>
-      <template v-if="dialogData.action === 'setPermission'">
-        <!-- 权限设置 -->
+      <template v-if="dialogData.action === 'setPermission' && dialogData.showDialog">
+        <!-- 权限设置：注意 el-tree 不是表单控件，不能通过 resetFields 方法重置，必须保证每次加载和提交时都是最新数据 -->
         <el-divider></el-divider>
-        <el-form-item label="选择权限" prop="checkedBtns">
-          <el-tree
-            ref="menuTree"
-            show-checkbox
-            default-expand-all
-            node-key="_id"
-            :data="menuList"
-            :props="{ children: 'children', label: 'menuName' }"
-          ></el-tree>
-        </el-form-item>
+        <el-tree
+          ref="menuTree"
+          show-checkbox
+          default-expand-all
+          node-key="_id"
+          :data="menuList"
+          :props="{ children: 'children', label: 'menuName' }"
+        ></el-tree>
       </template>
     </el-form>
     <template #footer>
@@ -115,7 +113,14 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
             dialogData.checkedPages = checkedPages;
             dialogData.checkedBtns = checkedBtns;
           }
-          ctx.$refs.menuTree.setCheckedKeys(dialogData.checkedBtns);
+          // 初始化选中页面节点（选中页面节点时不能包括子按钮节点）与按钮节点
+          [...dialogData.checkedPages, ...dialogData.checkedBtns].forEach((key) => {
+            ctx.$refs.menuTree.setChecked(
+              key,
+              true,
+              false,
+            );
+          });
         }
       }
     });
@@ -131,18 +136,14 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
           delete roleInfo.checkedPages;
           delete roleInfo.checkedBtns;
         } else {
-          const allCheckedMenu = ctx.$refs.menuTree.getCheckedNodes();
+          // 得到所有选中的节点，包括父级节点（半选中也算）和叶子节点
+          const allCheckedMenu = ctx.$refs.menuTree.getCheckedNodes(false, true);
           const checkedPages = [];
           const checkedBtns = [];
           allCheckedMenu.forEach((item) => {
             if (item) {
               // 选中的页面
-              if (
-                item.menuType === 1
-                && item.children
-                && item.children.length
-                && item.children[0].menuType === 2
-              ) {
+              if (item.menuType === 1) {
                 checkedPages.push(item._id);
               }
               // 选中的按钮

@@ -145,13 +145,15 @@ const useUserTableInitEffect = (ctx) => {
       formatter(row, column, value) {
         return utils.formatterDateTime(value);
       },
+      width: 90,
     },
     {
-      label: '最后登录时间',
+      label: '最后登录',
       prop: 'lastLoginTime',
       formatter(row, column, value) {
         return utils.formatterDateTime(value);
       },
+      width: 90,
     },
   ];
   // 表格数据

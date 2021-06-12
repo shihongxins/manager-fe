@@ -108,15 +108,15 @@ export default {
     }
     return count;
   },
-  async getMenuList(query) {
-    let list = [];
+  async getPermissionMenuList() {
+    let res = {};
     try {
-      list = await request.get('/menu/list', query);
+      res = await request.get('/menu/permissionMenuList');
     } catch (e) {
       console.error(e);
-      ElMessage.error('获取菜单列表出错！');
+      ElMessage.error('加载权限菜单出错！');
     }
-    return list;
+    return res;
   },
   async getUserList(query) {
     let res = {};
@@ -133,7 +133,7 @@ export default {
     try {
       const data = await request.post('/users/delete', userIds);
       if (data && data.nModified > 0) {
-        delCount = data.deletedCount;
+        delCount = data.nModified;
       }
     } catch (e) {
       console.error(e);
@@ -171,6 +171,16 @@ export default {
     } catch (e) {
       console.error(e);
       ElMessage.error('获取部门列表出错！');
+    }
+    return list;
+  },
+  async getMenuList(query) {
+    let list = [];
+    try {
+      list = await request.get('/menu/list', query);
+    } catch (e) {
+      console.error(e);
+      ElMessage.error('获取菜单列表出错！');
     }
     return list;
   },

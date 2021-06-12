@@ -103,8 +103,8 @@ export default {
     },
   },
   mounted() {
+    this.getPermissionMenuList();
     this.getNoticeCount();
-    this.getMenuList();
   },
   methods: {
     getNoticeCount() {
@@ -114,8 +114,8 @@ export default {
         }
       });
     },
-    getMenuList() {
-      this.$api.getMenuList().then((list) => {
+    getPermissionMenuList() {
+      this.$api.getPermissionMenuList().then((list) => {
         if (list.length) {
           this.menuList = list;
         }
