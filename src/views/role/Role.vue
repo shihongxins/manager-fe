@@ -18,7 +18,7 @@
     </div>
     <div class="table_container">
       <div class="table_tools">
-        <el-button type="primary" @click="showDialog(true, 'add')">
+        <el-button type="primary" @click="showDialog(true, 'add')" v-has="'role-add'">
           新增
         </el-button>
       </div>
@@ -39,18 +39,21 @@
               <el-button
                 size="mini"
                 @click="showDialog(true, 'edit', scope.row)"
+                v-has="'role-edit'"
                 >编辑</el-button
               >
               <el-button
                 size="mini"
                 type="primary"
                 @click="showDialog(true, 'setPermission', scope.row)"
+                v-has="'role-setPermission'"
                 >设置权限</el-button
               >
               <el-button
                 size="mini"
                 type="danger"
                 @click="handleSingleDel(scope.row)"
+                v-has="'role-delete'"
                 >删除</el-button
               >
             </template>

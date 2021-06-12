@@ -16,6 +16,7 @@
             value: '_id',
             checkStrictly: true,
             expandTrigger: 'hover',
+            disabled: 'menuCode'
           }"
           placeholder="请选择父级菜单"
           clearable

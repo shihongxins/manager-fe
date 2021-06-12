@@ -18,7 +18,7 @@
     </div>
     <div class="table_container">
       <div class="table_tools">
-        <el-button type="primary" @click="showDialog(true, 'add')">
+        <el-button type="primary" @click="showDialog(true, 'add')" v-has="'dept-add'">
           新增
         </el-button>
       </div>
@@ -42,12 +42,14 @@
                 size="mini"
                 type="primary"
                 @click="showDialog(true, 'add', scope.row)"
+                v-has="'dept-add-1'"
               >
                 添加
               </el-button>
               <el-button
                 size="mini"
                 @click="showDialog(true, 'edit', scope.row)"
+                v-has="'dept-edit'"
               >
                 编辑
               </el-button>
@@ -55,6 +57,7 @@
                 size="mini"
                 type="danger"
                 @click="handleSingleDel(scope.row)"
+                v-has="'dept-delete'"
               >
                 删除
               </el-button>

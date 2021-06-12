@@ -82,6 +82,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 // 引入自定义封装的递归树形菜单
 import TreeMenu from './TreeMenu.vue';
 
@@ -94,16 +95,18 @@ export default {
     return {
       noticeCount: 0,
       menuCollapsed: false,
-      menuList: [],
     };
   },
   computed: {
+    ...mapState({
+      menuList: 'permissionMenuList',
+    }),
     breadCrumb() {
       return this.$route.matched || [];
     },
   },
   mounted() {
-    this.getPermissionMenuList();
+    this.getPermissionList();
     this.getNoticeCount();
   },
   methods: {
@@ -114,19 +117,15 @@ export default {
         }
       });
     },
-    getPermissionMenuList() {
-      this.$api.getPermissionMenuList().then((list) => {
-        if (list.length) {
-          this.menuList = list;
-        }
-      });
+    getPermissionList() {
+      this.$api.getPermissionList();
     },
     handleMenuFoldClick() {
       this.menuCollapsed = !this.menuCollapsed;
     },
     handleUserCommand(command) {
       if (command === 'logout') {
-        this.$store.commit('clearUserInfo');
+        this.$store.commit('logout');
         this.$router.push({ name: 'Login' });
       }
     },

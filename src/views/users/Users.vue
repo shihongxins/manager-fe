@@ -34,9 +34,10 @@
         <el-button
           type="primary"
           @click="showDialog(true, 'add')"
+          v-has="'user-add'"
           >新增</el-button
         >
-        <el-button type="danger" @click="handlePatchDel">批量删除</el-button>
+        <el-button type="danger" @click="handlePatchDel" v-has="'user-patchDel'">批量删除</el-button>
       </div>
       <div class="table_content">
         <el-table
@@ -58,6 +59,7 @@
               <el-button
                 size="mini"
                 @click="showDialog(true, 'edit', scope.row)"
+                v-has="'user-edit'"
                 >编辑</el-button
               >
               <el-button
@@ -65,6 +67,7 @@
                 type="danger"
                 @click="handleSingleDel(scope.row)"
                 v-if="scope.row.role != 1"
+                v-has="'user-singleDel'"
                 >删除</el-button
               >
             </template>

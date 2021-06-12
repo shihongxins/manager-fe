@@ -6,7 +6,7 @@
 import { ElMessage } from 'element-plus';
 import router from '@/router';
 import { request, service } from '../utils/request';
-import storage from '../utils/storage';
+import store from '../store';
 
 const CODE = {
   SUCCESS: 200, // 成功
@@ -30,7 +30,7 @@ const ERROR_MESSAGE = {
 service.interceptors.request.use(
   (req) => {
     // JWT 认证，每次发送 API 请求都会携带 token ，没有就转到登录页
-    const { token } = storage.getItem('userInfo') || {};
+    const { token } = store.state.userInfo;
     req.headers.Authorization = `Bearer ${token}`;
     return req;
   },
@@ -56,7 +56,8 @@ service.interceptors.response.use(
         // 未登录或登录超时，2 秒后跳转到登录页
         if (result && (result.code === CODE.AUTH_ERROR || result.code === CODE.LOGIN_ERROR)) {
           setTimeout(() => {
-            storage.removeItem('userInfo');
+            // 清除 vuex 与 storage 中的存储的数据
+            store.commit('logout');
             router.push({ name: 'Login' });
           }, 2000);
         }
@@ -108,10 +109,11 @@ export default {
     }
     return count;
   },
-  async getPermissionMenuList() {
+  async getPermissionList() {
     let res = {};
     try {
-      res = await request.get('/menu/permissionMenuList');
+      res = await request.get('/menu/permissionList');
+      store.commit('savePermissionList', res);
     } catch (e) {
       console.error(e);
       ElMessage.error('加载权限菜单出错！');
