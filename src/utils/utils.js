@@ -14,9 +14,9 @@ export default {
     } else if (typeof datetime === 'string') {
       timeScamp = (new Date(datetime)).getTime();
       // ISO 时间转为 UTC 得加上时区偏移量（分钟 => 毫秒）
-      if (/T|Z/i.test(datetime)) {
-        timeScamp += (new Date()).getTimezoneOffset() * 60 * 1000;
-      }
+      // if (/T|Z/i.test(datetime)) {
+      //   timeScamp += (new Date()).getTimezoneOffset() * 60 * 1000;
+      // }
     } else if (Object.prototype.toString.call(datetime) === '[object Date]') {
       timeScamp = datetime.getTime();
     } else {
@@ -45,5 +45,15 @@ export default {
       }
     });
     return _formatter;
+  },
+  spreadTree(tree) {
+    let arr = [];
+    tree.forEach((item) => {
+      arr.push(item);
+      if (item.children && item.children.length) {
+        arr = arr.concat(...this.spreadTree(item.children));
+      }
+    });
+    return arr;
   },
 };

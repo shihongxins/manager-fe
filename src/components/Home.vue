@@ -106,7 +106,6 @@ export default {
     },
   },
   mounted() {
-    this.getPermissionList();
     this.getNoticeCount();
   },
   methods: {
@@ -116,9 +115,6 @@ export default {
           this.noticeCount = cnt;
         }
       });
-    },
-    getPermissionList() {
-      this.$api.getPermissionList();
     },
     handleMenuFoldClick() {
       this.menuCollapsed = !this.menuCollapsed;

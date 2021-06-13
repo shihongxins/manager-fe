@@ -55,20 +55,21 @@ export default {
     login() {
       this.onLogin = true;
       // 再次进行表单验证
-      this.$refs.loginForm.validate((valid) => {
+      this.$refs.loginForm.validate(async (valid) => {
         if (valid) {
           // 验证通过，调用根实例上挂载的 api 集合方法
-          this.$api.login(this.userInfo.userName, this.userInfo.userPwd).then((loginUser) => {
-            if (loginUser && loginUser.userName) {
-              // 保存用户信息
-              this.$store.commit('saveUserInfo', loginUser);
-              // 跳转到首页
-              this.$router.push({ name: 'Home' });
-            } else {
-              this.$message.error('登录失败！');
-            }
-            this.onLogin = false;
-          });
+          const loginUser = await this.$api.login(this.userInfo.userName, this.userInfo.userPwd);
+          if (loginUser && loginUser.userName) {
+            // 保存用户信息
+            this.$store.commit('saveUserInfo', loginUser);
+            // 根据已登录用户信息去加载权限菜单
+            await this.$api.getPermissionList();
+            // 跳转到首页
+            this.$router.push({ name: 'Home' });
+          } else {
+            this.$message.error('登录失败！');
+          }
+          this.onLogin = false;
         }
       });
     },
