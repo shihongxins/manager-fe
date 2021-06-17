@@ -3,10 +3,10 @@
  * @author shihongxins
  * @description 项目的请求 API 集合对象
  */
-import { ElMessage } from 'element-plus';
 import router from '@/router';
-import { request, service } from '../utils/request';
-import store from '../store';
+import store from '@/store';
+import { request, service } from '@/utils/request';
+import { ElMessage } from 'element-plus';
 
 const CODE = {
   SUCCESS: 200, // 成功
@@ -232,6 +232,29 @@ export default {
     } catch (e) {
       console.error(e);
       ElMessage.error(`${deptInfo.title}出错！`);
+    }
+    return res;
+  },
+  async getLeaveList(query) {
+    let list = [];
+    try {
+      list = await request.get('/leave/list', query, { isMock: false });
+    } catch (e) {
+      console.error(e);
+      ElMessage.error('获取休假申请列表出错！');
+    }
+    return list;
+  },
+  async applyLeaveOperate(leaveInfo) {
+    let res = false;
+    try {
+      const data = await request.post('/leave/operate', leaveInfo, { isMock: false });
+      if (data && (data.deletedCount > 0 || data.nModified > 0 || data._id)) {
+        res = true;
+      }
+    } catch (e) {
+      console.error(e);
+      ElMessage.error(`${leaveInfo.title}申请休假出错！`);
     }
     return res;
   },

@@ -109,12 +109,11 @@ export default {
     this.getNoticeCount();
   },
   methods: {
-    getNoticeCount() {
-      this.$api.getNoticeCount().then((cnt) => {
-        if (cnt !== undefined) {
-          this.noticeCount = cnt;
-        }
-      });
+    async getNoticeCount() {
+      const cnt = await this.$api.getNoticeCount();
+      if (cnt !== undefined) {
+        this.noticeCount = cnt;
+      }
     },
     handleMenuFoldClick() {
       this.menuCollapsed = !this.menuCollapsed;

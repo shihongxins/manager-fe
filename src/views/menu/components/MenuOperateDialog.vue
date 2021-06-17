@@ -99,7 +99,7 @@ const useMenuOperateEffect = (ctx, getMenuList) => {
     menuName: '',
     icon: '',
     path: '',
-    compoent: '',
+    component: '',
     menuState: 1,
     menuCode: '',
     // 下面是弹窗的属性数据
@@ -145,7 +145,7 @@ const useMenuOperateEffect = (ctx, getMenuList) => {
           dialogData.menuName = menuInfo.menuName;
           dialogData.icon = menuInfo.icon;
           dialogData.path = menuInfo.path;
-          dialogData.compoent = menuInfo.compoent;
+          dialogData.component = menuInfo.component;
           dialogData.menuState = menuInfo.menuState;
           dialogData.menuCode = menuInfo.menuCode;
         }
