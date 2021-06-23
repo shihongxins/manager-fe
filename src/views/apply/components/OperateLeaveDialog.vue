@@ -119,7 +119,7 @@ const useApplyLeaveEffect = (ctx, getLeaveList) => {
         leaveInfo.leaveDate.forEach((item, i) => {
           leaveInfo.leaveDate[i] = utils.formatterDateTime(item);
         });
-        const res = await ctx.$api.applyLeaveOperate(leaveInfo);
+        const res = await ctx.$api.leaveOperate(leaveInfo);
         if (res === true) {
           // 关闭弹窗
           handleToggleDialogShow(false);

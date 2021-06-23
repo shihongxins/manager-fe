@@ -89,7 +89,7 @@ export default {
     let userInfo = {};
     try {
       if (userName && userPwd) {
-        userInfo = await request.post('/users/login', { userName, userPwd });
+        userInfo = await request.post('/user/login', { userName, userPwd });
       } else {
         ElMessage.warning('请填写用户名和密码');
       }
@@ -123,7 +123,7 @@ export default {
   async getUserList(query) {
     let res = {};
     try {
-      res = await request.get('/users/list', query);
+      res = await request.get('/user/list', query);
     } catch (e) {
       console.error(e);
       ElMessage.error('获取用户列表出错！');
@@ -133,7 +133,7 @@ export default {
   async userDel(userIds) {
     let delCount = 0;
     try {
-      const data = await request.post('/users/delete', userIds);
+      const data = await request.post('/user/delete', userIds);
       if (data && data.nModified > 0) {
         delCount = data.nModified;
       }
@@ -146,7 +146,7 @@ export default {
   async userOperate(userInfo) {
     let res = false;
     try {
-      const data = await request.post('/users/operate', userInfo);
+      const data = await request.post('/user/operate', userInfo);
       if (data && (data.nModified > 0 || data._id)) {
         res = true;
       }
@@ -245,7 +245,7 @@ export default {
     }
     return list;
   },
-  async applyLeaveOperate(leaveInfo) {
+  async leaveOperate(leaveInfo) {
     let res = false;
     try {
       const data = await request.post('/leave/operate', leaveInfo, { isMock: false });
@@ -255,6 +255,19 @@ export default {
     } catch (e) {
       console.error(e);
       ElMessage.error(`${leaveInfo.title}申请休假出错！`);
+    }
+    return res;
+  },
+  async leaveAudit(auditInfo) {
+    let res = false;
+    try {
+      const data = await request.post('/leave/audit', auditInfo, { isMock: false });
+      if (data && (data.deletedCount > 0 || data.nModified > 0 || data._id)) {
+        res = true;
+      }
+    } catch (e) {
+      console.error(e);
+      ElMessage.error(`${auditInfo.title}申请休假出错！`);
     }
     return res;
   },

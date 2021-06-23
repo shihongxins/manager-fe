@@ -1,14 +1,14 @@
 <template>
   <el-dialog v-model="dialogData.showDialog" :title="dialogData.title">
-      <el-steps :active="dialogData.currentFlow">
-        <el-step
-          v-for="(flow, index) in dialogData.auditFlows"
-          :key="index"
-          :title="flow.userName"
-          :description="getStepDesc(index)"
-          :status="getStepStatus(index)"
-        ></el-step>
-      </el-steps>
+    <el-steps :active="dialogData.currentFlow">
+      <el-step
+        v-for="(flow, index) in dialogData.auditFlows"
+        :key="index"
+        :title="flow.userName"
+        :status="getStepInfo(index).status"
+        :description="getStepInfo(index).desc"
+      ></el-step>
+    </el-steps>
     <el-form
       :model="dialogData"
       :rules="dialogDataRules"
@@ -35,9 +35,9 @@
         <span>{{ applyStateDesc }}</span>
       </el-form-item>
       <el-form-item label="审核人:">
-        <span>{{ currentAuditUser?.userName }}</span>
+        <span>{{ dialogData.currentFlowUser.userName }}</span>
       </el-form-item>
-      <el-form-item label="备注:" prop="remark" v-if="dialogData.action==='audit'">
+      <el-form-item label="备注:" prop="remark" v-if="dialogData.action==='edit'">
         <el-input
           type="textarea"
           v-model="dialogData.remark"
@@ -46,9 +46,9 @@
         </el-input>
       </el-form-item>
     </el-form>
-    <template #footer v-if="dialogData.action==='audit'">
-      <el-button @click="handleToggleDialogShow(false)">取 消</el-button>
-      <el-button type="primary" @click="handleSubmitApplyLeave">确 定</el-button>
+    <template #footer v-if="dialogData.action==='edit'">
+      <el-button type="danger" @click="handleSubmitApplyLeave('reject')">驳 回</el-button>
+      <el-button type="primary" @click="handleSubmitApplyLeave('approve')">批 准</el-button>
     </template>
   </el-dialog>
 </template>
@@ -67,6 +67,7 @@ const useLeaveOperateEffect = (ctx, getLeaveList) => {
   // 弹窗与弹窗表单的数据
   const dialogData = reactive({
     // 下面是弹窗的表单数据
+    _id: '',
     leaveType: 0,
     leaveDate: [],
     leaveLength: 0,
@@ -75,11 +76,12 @@ const useLeaveOperateEffect = (ctx, getLeaveList) => {
     applyUser: {},
     auditFlows: [],
     currentFlow: 0,
+    currentFlowUser: {},
     auditLogs: [],
     remark: '',
     // 下面是弹窗的属性数据
     showDialog: false, // true 展示, false 隐藏
-    action: '', // view 查看, audit 审核
+    action: '', // view 查看, edit 审核
     title: '',
   });
   // 弹窗表单的数据校验规则
@@ -97,45 +99,41 @@ const useLeaveOperateEffect = (ctx, getLeaveList) => {
       (item) => item.value === dialogData.applyState,
     )[0]?.label,
   );
-  const currentAuditUser = computed(
-    () => dialogData.auditFlows.filter(
-      (item, index) => index === dialogData.currentFlow,
-    )[0],
-  );
-  const getStepStatus = (flowIndex) => {
-    // ['wait', 'process', 'finish', 'error', 'success'];
-    let status = 'wait';
-    if (dialogData.applyState > 3) {
-      // 4 审批驳回， 5 撤销作废
-      status = 'error';
+  const getStepInfo = (flowIndex) => {
+    const stepInfo = {
+      // 状态 ['wait', 'process', 'finish', 'error', 'success'];
+      status: 'wait',
+      // 描述
+      desc: applyStateDesc.value,
+    };
+    const log = dialogData.auditLogs.filter(
+      (item) => (item.userId === dialogData.auditFlows[flowIndex].userId),
+    );
+    if (log.length > 0) {
+      stepInfo.desc = log[0].remark;
+      stepInfo.status = log[0].action === 'reject' ? 'error' : 'success';
+    } else {
+      if (dialogData.applyState < 3) {
+        // 1 待审批， 2 审批中
+        if (flowIndex === dialogData.currentFlow) {
+          stepInfo.status = 'process';
+        }
+      }
+      if (dialogData.applyState > 3) {
+        // 4 审批驳回， 5 撤销作废
+        stepInfo.status = 'error';
+      }
     }
     if (dialogData.applyState === 3) {
       // 3 审批通过
-      status = 'finish';
+      stepInfo.status = 'finish';
     }
-    if (dialogData.applyState < 3) {
-      // 1 待审批， 2 审批中
-      if (flowIndex === dialogData.currentFlow) {
-        status = 'process';
-      }
-      if (dialogData.auditLogs[flowIndex]) {
-        status = 'success';
-      }
-    }
-    return status;
-  };
-  const getStepDesc = (flowIndex) => {
-    if (dialogData.auditLogs[flowIndex]
-      && dialogData.auditLogs[flowIndex].userName === dialogData.auditFlows[flowIndex].userName) {
-      const { action, remark } = dialogData.auditLogs[flowIndex];
-      return `${action}: ${remark}`;
-    }
-    return applyStateDesc.value;
+    return stepInfo;
   };
   // 弹窗的显隐状态切换方法
   const handleToggleDialogShow = (show, action, leaveInfo) => {
     // action 必须为 查看或审核，才能显示表单
-    if (action === 'view' || action === 'audit') {
+    if (action === 'view' || action === 'edit') {
       dialogData.action = action;
       dialogData.title = `${action === 'view' ? '查看' : '审核'}休假申请`;
     }
@@ -147,6 +145,7 @@ const useLeaveOperateEffect = (ctx, getLeaveList) => {
       ctx.$refs.operateForm.resetFields();
       if (show) {
         // 如果是打开编辑，重新填充默认值
+        dialogData._id = leaveInfo._id;
         dialogData.leaveType = leaveInfo.leaveType;
         dialogData.leaveDate = leaveInfo.leaveDate;
         dialogData.leaveLength = leaveInfo.leaveLength;
@@ -155,19 +154,20 @@ const useLeaveOperateEffect = (ctx, getLeaveList) => {
         dialogData.applyUser = leaveInfo.applyUser;
         dialogData.auditFlows = leaveInfo.auditFlows;
         dialogData.currentFlow = leaveInfo.currentFlow;
+        dialogData.currentFlowUser = leaveInfo.currentFlowUser;
         dialogData.auditLogs = leaveInfo.auditLogs;
         dialogData.remark = leaveInfo.remark;
       }
     });
   };
   // 弹窗表单数据的提交
-  const handleSubmitApplyLeave = () => {
+  const handleSubmitApplyLeave = (auditAction) => {
     // 提交前 校验表单
     ctx.$refs.operateForm.validate(async (valid) => {
-      if (valid) {
+      if (valid && auditAction) {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
-        const leaveInfo = toRaw(dialogData);
-        const res = await ctx.$api.applyLeaveOperate(leaveInfo);
+        const { _id, remark } = toRaw(dialogData);
+        const res = await ctx.$api.leaveAudit({ _id, remark, action: auditAction });
         if (res === true) {
           // 关闭弹窗
           handleToggleDialogShow(false);
@@ -176,7 +176,7 @@ const useLeaveOperateEffect = (ctx, getLeaveList) => {
           // 弹出提示
           ctx.$message.success('提交审核休假申请成功！');
         } else {
-          ctx.$message.warning('提交审核休假申请失败');
+          ctx.$message.warning('提交审核休假申请失败！');
         }
       }
     });
@@ -187,9 +187,7 @@ const useLeaveOperateEffect = (ctx, getLeaveList) => {
     dialogDataRules,
     leaveTypeDesc,
     applyStateDesc,
-    currentAuditUser,
-    getStepStatus,
-    getStepDesc,
+    getStepInfo,
     handleToggleDialogShow,
     handleSubmitApplyLeave,
   };

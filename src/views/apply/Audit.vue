@@ -22,11 +22,6 @@
       </el-form>
     </div>
     <div class="table_container">
-      <div class="table_tools">
-        <el-button type="primary" @click="showOperateLeaveDialog(true, 'add')" v-has="'leave-add'">
-          申请休假
-        </el-button>
-      </div>
       <div class="table_content">
         <el-table
           :data="leaveList"
@@ -45,20 +40,20 @@
           <el-table-column label="操作" width="150px">
             <template #default="scope">
               <el-button
+                v-if="editable(scope.row)"
+                type="primary"
                 size="mini"
-                @click="showAuditLeaveDialog(true, 'view', scope.row)"
-                v-has="'leave-view'"
+                @click="showAuditLeaveDialog(true, 'edit', scope.row)"
+                v-has="'leave-edit'"
               >
-                查看
+                审核
               </el-button>
               <el-button
-                v-if="[1,2].indexOf(scope.row.applyState) > -1"
+                v-else
                 size="mini"
-                type="danger"
-                @click="handleSingleDel(scope.row)"
-                v-has="'leave-delete'"
+                @click="showAuditLeaveDialog(true, 'view', scope.row)"
               >
-                作废
+                查看
               </el-button>
             </template>
           </el-table-column>
@@ -77,10 +72,6 @@
         </el-pagination>
       </div>
     </div>
-    <OperateLeaveDialog
-      ref="operateLeaveDialog"
-      :getLeaveList="getLeaveList"
-      :leaveTypeList="leaveTypeList" />
     <AuditLeaveDialog
       ref="auditLeaveDialog"
       :getLeaveList="getLeaveList"
@@ -94,20 +85,26 @@ import {
   getCurrentInstance, onMounted, reactive, ref,
 } from 'vue';
 import utils from '@/utils/utils';
-import OperateLeaveDialog from './components/OperateLeaveDialog.vue';
 import AuditLeaveDialog from './components/AuditLeaveDialog.vue';
 
 /**
  * @param {Object} ctx 页面实例对象
  * @description 休假数据表格的初始化业务逻辑（包括查询）
  */
-const useLeaveTableInitEffect = (ctx) => {
+const useAuditTableInitEffect = (ctx) => {
   // 表格展示列项
   const tableColumns = [
     {
       label: '申请单号',
       prop: 'applyNO',
       width: 120,
+    },
+    {
+      label: '申请人',
+      prop: 'applyUser',
+      formatter(row, column, value) {
+        return value.userName;
+      },
     },
     {
       label: '申请时间',
@@ -163,7 +160,7 @@ const useLeaveTableInitEffect = (ctx) => {
       },
     },
     {
-      label: '申请状态',
+      label: '审批状态',
       prop: 'applyState',
       width: 70,
       formatter(row, column, value) {
@@ -185,14 +182,13 @@ const useLeaveTableInitEffect = (ctx) => {
     { label: '审批中', value: 2 },
     { label: '审批通过', value: 3 },
     { label: '审批驳回', value: 4 },
-    { label: '撤销作废', value: 5 },
   ]);
   // 表格数据
   const leaveList = ref([]);
   // 表格数据查询字段
   const query = reactive({
-    applyState: 0,
-    type: 'apply',
+    applyState: 1,
+    type: 'audit',
   });
   // 表格数据分页
   const pageData = reactive({
@@ -219,30 +215,14 @@ const useLeaveTableInitEffect = (ctx) => {
     pageData.pageSize = pageSize || 10;
     getLeaveList();
   };
-  // （调用子组件的方法）弹出新增申请休假
-  const showOperateLeaveDialog = (show) => {
-    ctx.$refs.operateLeaveDialog.handleToggleDialogShow(show);
-  };
   // （调用子组件的方法）弹出查看、审核申请休假详情弹窗
   const showAuditLeaveDialog = (show, action, leaveInfo) => {
     ctx.$refs.auditLeaveDialog.handleToggleDialogShow(show, action, leaveInfo);
   };
-  // 删除一项休假及其子休假
-  const handleSingleDel = async (row) => {
-    if (row && row._id) {
-      const res = await ctx.$api.leaveOperate({
-        _id: row._id,
-        action: 'delete',
-        title: '撤销并作废休假申请',
-      });
-      if (res === true) {
-        ctx.$message.success('作废撤销成功！');
-        getLeaveList();
-      } else {
-        ctx.$message.error('作废撤销失败！');
-      }
-    }
-  };
+  // “审核” 按钮是否显示
+  const editable = (row) => (row
+    && [1, 2].indexOf(row.applyState) > -1
+    && row.currentFlowUser?.userId === ctx.$store.state.userInfo?.userId);
   // 页面初始化的时候自动执行一次加载数据
   onMounted(() => {
     getLeaveList();
@@ -256,22 +236,20 @@ const useLeaveTableInitEffect = (ctx) => {
     pageData,
     getLeaveList,
     handleQuerySubmit,
-    showOperateLeaveDialog,
     showAuditLeaveDialog,
-    handleSingleDel,
+    editable,
   };
 };
 
 export default {
-  name: 'Leave',
+  name: 'Audit',
   components: {
-    OperateLeaveDialog,
     AuditLeaveDialog,
   },
   setup() {
     const { ctx } = getCurrentInstance();
     return {
-      ...useLeaveTableInitEffect(ctx),
+      ...useAuditTableInitEffect(ctx),
     };
   },
 };
