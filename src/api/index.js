@@ -102,7 +102,8 @@ export default {
   async getNoticeCount() {
     let count = 0;
     try {
-      count = await request.get('/leave/count', {}, { isMock: true });
+      count = await request.get('/leave/count');
+      store.commit('saveNoticeCount', count);
     } catch (e) {
       console.error(e);
       ElMessage.error('查询通知出错！');

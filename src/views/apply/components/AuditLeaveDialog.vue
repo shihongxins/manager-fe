@@ -174,9 +174,11 @@ const useLeaveOperateEffect = (ctx, getLeaveList) => {
           // 重新加载表格
           getLeaveList();
           // 弹出提示
-          ctx.$message.success('提交审核休假申请成功！');
+          ctx.$message.success('提交审核 成功！');
+          // 刷新通知提示徽章
+          ctx.$api.getNoticeCount();
         } else {
-          ctx.$message.warning('提交审核休假申请失败！');
+          ctx.$message.warning('提交审核 失败！');
         }
       }
     });

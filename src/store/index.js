@@ -7,6 +7,7 @@ export default createStore({
     userInfo: (storeage.getItem('userInfo') || {}),
     permissionMenuList: (storeage.getItem('permissionMenuList') || []),
     permissionBtnList: (storeage.getItem('permissionBtnList') || []),
+    noticeCount: (storeage.getItem('noticeCount') || 0),
   },
   getters: {
     permissionBtnCodeList: (state) => state.permissionBtnList.map((btn) => btn.menuCode),
@@ -32,6 +33,12 @@ export default createStore({
         }
       } else {
         console.log('权限动态菜单与按钮信息不能为空！', permissionList);
+      }
+    },
+    saveNoticeCount(state, count) {
+      if (typeof count === 'number') {
+        state.noticeCount = count;
+        storeage.setItem('noticeCount', count);
       }
     },
     logout(state) {

@@ -51,16 +51,21 @@
             <div class="header-right">
               <!-- 通知 -->
               <div class="notice">
-                <el-badge :is-dot="!!noticeCount" type="danger">
+                <el-badge
+                  :is-dot="!!noticeCount"
+                  type="danger"
+                  @click="$router.push('/apply/audit')">
                   <i class="el-icon-bell"></i>
                 </el-badge>
               </div>
               <!-- 用户功能区 -->
               <el-dropdown class="user" @command="handleUserCommand">
-                <el-avatar class="user_avatar">user</el-avatar>
+                <el-avatar class="user_avatar">
+                  {{loginUser.userName}}
+                </el-avatar>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="email" disabled
+                    <el-dropdown-item command="loginUserDetail"
                       >个人信息</el-dropdown-item
                     >
                     <el-dropdown-item command="logout" divided
@@ -77,6 +82,20 @@
           <router-view></router-view>
         </el-main>
       </el-container>
+        <el-dialog
+          v-model="showUserInfoDialog"
+          :width="300"
+          :before-close="() => {showUserInfoDialog = false}">
+          <el-descriptions title="个人信息" column="1">
+            <el-descriptions-item label="用户名">{{loginUser.userName}}</el-descriptions-item>
+            <el-descriptions-item label="岗位">{{loginUser.job}}</el-descriptions-item>
+            <el-descriptions-item label="邮箱">{{loginUser.userEmail}}</el-descriptions-item>
+            <el-descriptions-item label="手机">{{loginUser.mobile}}</el-descriptions-item>
+            <el-descriptions-item label="系统身份">
+              {{loginUser.role == 1 ? '管理员' : '普通用户'}}
+            </el-descriptions-item>
+          </el-descriptions>
+        </el-dialog>
     </el-container>
   </div>
 </template>
@@ -93,12 +112,14 @@ export default {
   },
   data() {
     return {
-      noticeCount: 0,
       menuCollapsed: false,
+      showUserInfoDialog: false,
     };
   },
   computed: {
     ...mapState({
+      noticeCount: 'noticeCount',
+      loginUser: 'userInfo',
       menuList: 'permissionMenuList',
     }),
     breadCrumb() {
@@ -106,15 +127,10 @@ export default {
     },
   },
   mounted() {
-    this.getNoticeCount();
+    // 刷新通知提示徽章
+    this.$api.getNoticeCount();
   },
   methods: {
-    async getNoticeCount() {
-      const cnt = await this.$api.getNoticeCount();
-      if (cnt !== undefined) {
-        this.noticeCount = cnt;
-      }
-    },
     handleMenuFoldClick() {
       this.menuCollapsed = !this.menuCollapsed;
     },
@@ -122,6 +138,9 @@ export default {
       if (command === 'logout') {
         this.$store.commit('logout');
         this.$router.push({ name: 'Login' });
+      }
+      if (command === 'loginUserDetail') {
+        this.showUserInfoDialog = true;
       }
     },
   },
@@ -185,6 +204,10 @@ export default {
         align-items: center;
         .notice {
           padding: 12px 20px;
+          cursor: pointer;
+          :hover {
+            font-weight: bold;
+          }
         }
         .user {
           &_avatar {
