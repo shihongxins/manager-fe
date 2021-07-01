@@ -126,6 +126,7 @@ export default {
       return this.$route.matched || [];
     },
   },
+  inject: ['$api'],
   mounted() {
     // 刷新通知提示徽章
     this.$api.getNoticeCount();

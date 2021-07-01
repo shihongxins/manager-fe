@@ -91,17 +91,19 @@
 
 <script>
 import {
-  getCurrentInstance, onMounted, reactive, ref,
+  getCurrentInstance, onMounted, reactive, ref, inject,
 } from 'vue';
 import utils from '@/utils/utils';
 import OperateLeaveDialog from './components/OperateLeaveDialog.vue';
 import AuditLeaveDialog from './components/AuditLeaveDialog.vue';
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @description 休假数据表格的初始化业务逻辑（包括查询）
  */
-const useLeaveTableInitEffect = (ctx) => {
+const useLeaveTableInitEffect = (proxy) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 表格展示列项
   const tableColumns = [
     {
@@ -203,7 +205,7 @@ const useLeaveTableInitEffect = (ctx) => {
   // 加载表格数据的方法
   const getLeaveList = async () => {
     const params = { ...pageData, ...query };
-    const { page, list } = await ctx.$api.getLeaveList(params);
+    const { page, list } = await $api.getLeaveList(params);
     if (page && list) {
       leaveList.value = list;
       pageData.total = page.total;
@@ -213,7 +215,7 @@ const useLeaveTableInitEffect = (ctx) => {
   const handleQuerySubmit = (options) => {
     const { reset, pageNum, pageSize } = options;
     if (reset) {
-      ctx.$refs.queryForm.resetFields();
+      proxy.$refs.queryForm.resetFields();
     }
     pageData.pageNum = pageNum || 1;
     pageData.pageSize = pageSize || 10;
@@ -221,25 +223,25 @@ const useLeaveTableInitEffect = (ctx) => {
   };
   // （调用子组件的方法）弹出新增申请休假
   const showOperateLeaveDialog = (show) => {
-    ctx.$refs.operateLeaveDialog.handleToggleDialogShow(show);
+    proxy.$refs.operateLeaveDialog.handleToggleDialogShow(show);
   };
   // （调用子组件的方法）弹出查看、审核申请休假详情弹窗
   const showAuditLeaveDialog = (show, action, leaveInfo) => {
-    ctx.$refs.auditLeaveDialog.handleToggleDialogShow(show, action, leaveInfo);
+    proxy.$refs.auditLeaveDialog.handleToggleDialogShow(show, action, leaveInfo);
   };
   // 删除一项休假及其子休假
   const handleSingleDel = async (row) => {
     if (row && row._id) {
-      const res = await ctx.$api.leaveOperate({
+      const res = await $api.leaveOperate({
         _id: row._id,
         action: 'delete',
         title: '撤销并作废休假申请',
       });
       if (res === true) {
-        ctx.$message.success('作废撤销成功！');
+        proxy.$message.success('作废撤销成功！');
         getLeaveList();
       } else {
-        ctx.$message.error('作废撤销失败！');
+        proxy.$message.error('作废撤销失败！');
       }
     }
   };
@@ -269,9 +271,9 @@ export default {
     AuditLeaveDialog,
   },
   setup() {
-    const { ctx } = getCurrentInstance();
+    const { proxy } = getCurrentInstance();
     return {
-      ...useLeaveTableInitEffect(ctx),
+      ...useLeaveTableInitEffect(proxy),
     };
   },
 };

@@ -52,15 +52,17 @@
 
 <script>
 import {
-  getCurrentInstance, reactive, toRaw,
+  getCurrentInstance, reactive, toRaw, inject,
 } from 'vue';
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @param {Function} getRoleList 重新加载页面表格数据的方法
  * @description 新增、编辑角色数据的业务逻辑（弹窗）
  */
-const useRoleOperateEffect = (ctx, getRoleList) => {
+const useRoleOperateEffect = (proxy, getRoleList) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 弹窗与弹窗表单的数据
   const dialogData = reactive({
     // 下面是弹窗的表单数据
@@ -95,9 +97,9 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
     // 改变弹窗显示状态
     dialogData.showDialog = show;
     // ❗❗❗❗弹窗改变结束并操作完 DOM 后，再才执行下面的任务
-    ctx.$nextTick(() => {
+    proxy.$nextTick(() => {
       // 清空弹窗的表单 在显示之前不要修改任何除弹窗显示之外的任何 dialogData 字段，否则无法重置表单
-      ctx.$refs.operateForm.resetFields();
+      proxy.$refs.operateForm.resetFields();
       if (
         roleInfo !== undefined
         && (action === 'edit' || action === 'setPermission')
@@ -115,7 +117,7 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
           }
           // 初始化选中页面节点（选中页面节点时不能包括子按钮节点）与按钮节点
           [...dialogData.checkedPages, ...dialogData.checkedBtns].forEach((key) => {
-            ctx.$refs.menuTree.setChecked(
+            proxy.$refs.menuTree.setChecked(
               key,
               true,
               false,
@@ -128,7 +130,7 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
   // 弹窗表单数据的提交
   const handleSubmitRoleOperate = () => {
     // 提交前 校验表单
-    ctx.$refs.operateForm.validate(async (valid) => {
+    proxy.$refs.operateForm.validate(async (valid) => {
       if (valid) {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
         const roleInfo = toRaw(dialogData);
@@ -137,7 +139,7 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
           delete roleInfo.checkedBtns;
         } else {
           // 得到所有选中的节点，包括父级节点（半选中也算）和叶子节点
-          const allCheckedMenu = ctx.$refs.menuTree.getCheckedNodes(false, true);
+          const allCheckedMenu = proxy.$refs.menuTree.getCheckedNodes(false, true);
           const checkedPages = [];
           const checkedBtns = [];
           allCheckedMenu.forEach((item) => {
@@ -154,18 +156,18 @@ const useRoleOperateEffect = (ctx, getRoleList) => {
           });
           roleInfo.rolePermission = { checkedPages, checkedBtns };
         }
-        const res = await ctx.$api.roleOperate(roleInfo);
+        const res = await $api.roleOperate(roleInfo);
         if (res === true) {
           // 关闭弹窗
           handleToggleDialogShow(false);
           // 重新加载表格
           getRoleList();
           // 弹出提示
-          ctx.$message.success(
+          proxy.$message.success(
             `${dialogData.title} -> [${roleInfo.roleName}] 成功！`,
           );
         } else {
-          ctx.$message.warning(
+          proxy.$message.warning(
             `${dialogData.title} -> [${roleInfo.roleName}] 失败！`,
           );
         }
@@ -194,9 +196,9 @@ export default {
     },
   },
   setup(props) {
-    const { ctx } = getCurrentInstance();
+    const { proxy } = getCurrentInstance();
     return {
-      ...useRoleOperateEffect(ctx, props.getRoleList),
+      ...useRoleOperateEffect(proxy, props.getRoleList),
     };
   },
 };

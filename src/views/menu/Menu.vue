@@ -79,16 +79,18 @@
 
 <script>
 import {
-  getCurrentInstance, onMounted, reactive, ref,
+  getCurrentInstance, onMounted, reactive, ref, inject,
 } from 'vue';
 import utils from '@/utils/utils';
 import MenuOperateDialog from './components/MenuOperateDialog.vue';
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @description 菜单数据表格的初始化业务逻辑（包括查询）
  */
-const useMenuTableInitEffect = (ctx) => {
+const useMenuTableInitEffect = (proxy) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 表格展示列项
   const tableColumns = [
     {
@@ -152,7 +154,7 @@ const useMenuTableInitEffect = (ctx) => {
   // 加载表格数据的方法
   const getMenuList = async () => {
     const params = { ...query };
-    const list = await ctx.$api.getMenuList(params);
+    const list = await $api.getMenuList(params);
     if (list) {
       menuList.value = list;
     }
@@ -161,27 +163,27 @@ const useMenuTableInitEffect = (ctx) => {
   const handleQuerySubmit = (options) => {
     const { reset } = options;
     if (reset) {
-      ctx.$refs.queryForm.resetFields();
+      proxy.$refs.queryForm.resetFields();
     }
     getMenuList();
   };
   // （调用子组件的方法）弹出菜单编辑弹窗
   const showDialog = (show, action, menuInfo) => {
-    ctx.$refs.menuOperateDialog.handleToggleDialogShow(show, action, menuInfo);
+    proxy.$refs.menuOperateDialog.handleToggleDialogShow(show, action, menuInfo);
   };
   // 删除一项菜单及其子菜单
   const handleSingleDel = async (row) => {
     if (row && row._id) {
-      const res = await ctx.$api.menuOperate({
+      const res = await $api.menuOperate({
         _id: row._id,
         menuName: row.menuName,
         action: 'delete',
       });
       if (res === true) {
-        ctx.$message.success('删除成功！');
+        proxy.$message.success('删除成功！');
         getMenuList();
       } else {
-        ctx.$message.error('删除失败！');
+        proxy.$message.error('删除失败！');
       }
     }
   };
@@ -207,9 +209,9 @@ export default {
   },
   setup() {
     // 获取页面实例，供其他逻辑使用
-    const { ctx } = getCurrentInstance();
+    const { proxy } = getCurrentInstance();
     return {
-      ...useMenuTableInitEffect(ctx),
+      ...useMenuTableInitEffect(proxy),
     };
   },
 };

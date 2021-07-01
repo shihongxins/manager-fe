@@ -93,16 +93,18 @@
 
 <script>
 import {
-  getCurrentInstance, onMounted, reactive, ref,
+  getCurrentInstance, onMounted, reactive, ref, inject,
 } from 'vue';
 import utils from '@/utils/utils';
 import UserOperateDialog from './components/UserOperateDialog.vue';
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @description 用户数据表格的初始化业务逻辑（包括查询与分页）
  */
-const useUserTableInitEffect = (ctx) => {
+const useUserTableInitEffect = (proxy) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 表格展示列项
   const tableColumns = [
     {
@@ -176,7 +178,7 @@ const useUserTableInitEffect = (ctx) => {
   // 加载表格数据的方法
   const getUserList = async () => {
     const params = { ...pageData, ...query };
-    const { page, list } = await ctx.$api.getUserList(params);
+    const { page, list } = await $api.getUserList(params);
     if (page && list) {
       userList.value = list;
       pageData.total = page.total;
@@ -186,7 +188,7 @@ const useUserTableInitEffect = (ctx) => {
   const handleQuerySubmit = (options) => {
     const { reset, pageNum, pageSize } = options;
     if (reset) {
-      ctx.$refs.queryForm.resetFields();
+      proxy.$refs.queryForm.resetFields();
     }
     pageData.pageNum = pageNum || 1;
     pageData.pageSize = pageSize || 10;
@@ -194,7 +196,7 @@ const useUserTableInitEffect = (ctx) => {
   };
   // （调用子组件的方法）弹出用户编辑弹窗
   const showDialog = (show, action, userInfo) => {
-    ctx.$refs.userOperateDialog.handleToggleDialogShow(show, action, userInfo);
+    proxy.$refs.userOperateDialog.handleToggleDialogShow(show, action, userInfo);
   };
   // 页面初始化的时候自动执行一次加载数据
   onMounted(() => {
@@ -212,11 +214,13 @@ const useUserTableInitEffect = (ctx) => {
 };
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @param {Function} getUserList 重新加载页面表格数据的方法
  * @description 删除用户数据的业务逻辑
  */
-const useUserDeleteEffect = (ctx, getUserList) => {
+const useUserDeleteEffect = (proxy, getUserList) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 选中的表格数据
   const userSelectedList = ref([]);
   const handleSelectionChange = (list) => {
@@ -225,17 +229,17 @@ const useUserDeleteEffect = (ctx, getUserList) => {
   // 根据用户 Id 删除用户（数组，可删除多个）的具体方法
   const userDelete = async (userIds) => {
     if (userIds.length > 0) {
-      const delCount = await ctx.$api.userDel({
+      const delCount = await $api.userDel({
         userIds,
       });
       if (delCount > 0) {
-        ctx.$message.success('删除成功！');
+        proxy.$message.success('删除成功！');
         getUserList();
       } else {
-        ctx.$message.error('删除失败！');
+        proxy.$message.error('删除失败！');
       }
     } else {
-      ctx.$message.warning('请先选中数据！');
+      proxy.$message.warning('请先选中数据！');
     }
   };
   // 用户单条数据删除
@@ -270,7 +274,9 @@ export default {
   },
   setup() {
     // 获取页面实例，供其他逻辑使用
-    const { ctx } = getCurrentInstance();
+    // [Vue3 getCurrentInstance 访问组件实例上下文，需使用 proxy 而非 ctx](https://www.jianshu.com/p/5558cadd10b9)
+    // const { ctx } = getCurrentInstance();
+    const { proxy } = getCurrentInstance();
     // 调用 用户数据表格的初始化业务逻辑
     // （它需要先解构的原因是，另外两个业务逻辑也要用到它内部的 getUserList 而不能再产生另外的作用域）
     const {
@@ -281,7 +287,7 @@ export default {
       getUserList,
       handleQuerySubmit,
       showDialog,
-    } = useUserTableInitEffect(ctx);
+    } = useUserTableInitEffect(proxy);
     return {
       tableColumns,
       userList,
@@ -291,7 +297,7 @@ export default {
       handleQuerySubmit,
       showDialog,
       // 调用 删除用户数据的业务逻辑
-      ...useUserDeleteEffect(ctx, getUserList),
+      ...useUserDeleteEffect(proxy, getUserList),
     };
   },
 };

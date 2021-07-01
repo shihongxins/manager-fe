@@ -60,15 +60,17 @@
 
 <script>
 import {
-  getCurrentInstance, reactive, toRaw, ref,
+  getCurrentInstance, reactive, toRaw, ref, inject,
 } from 'vue';
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @param {Function} getDeptList 重新加载页面表格数据的方法
  * @description 新增、编辑部门数据的业务逻辑（弹窗）
  */
-const useDeptOperateEffect = (ctx, getDeptList) => {
+const useDeptOperateEffect = (proxy, getDeptList) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 弹窗与弹窗表单的数据
   const dialogData = reactive({
     // 下面是弹窗的表单数据
@@ -105,11 +107,11 @@ const useDeptOperateEffect = (ctx, getDeptList) => {
     // 改变弹窗显示状态
     dialogData.showDialog = show;
     // ❗❗❗❗弹窗改变结束并操作完 DOM 后，再才执行下面的任务
-    ctx.$nextTick(() => {
+    proxy.$nextTick(() => {
       // 清空弹窗的表单
-      ctx.$refs.operateForm.resetFields();
+      proxy.$refs.operateForm.resetFields();
       // 加载用户列表
-      ctx.$api.getUserList().then((data) => {
+      $api.getUserList().then((data) => {
         const { list } = data;
         if (list && list.length) {
           userList.value = list;
@@ -136,22 +138,22 @@ const useDeptOperateEffect = (ctx, getDeptList) => {
   // 弹窗表单数据的提交
   const handleSubmitDeptOperate = () => {
     // 提交前 校验表单
-    ctx.$refs.operateForm.validate(async (valid) => {
+    proxy.$refs.operateForm.validate(async (valid) => {
       if (valid) {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
         const deptInfo = toRaw(dialogData);
-        const res = await ctx.$api.deptOperate(deptInfo);
+        const res = await $api.deptOperate(deptInfo);
         if (res === true) {
           // 关闭弹窗
           handleToggleDialogShow(false);
           // 重新加载表格
           getDeptList();
           // 弹出提示
-          ctx.$message.success(
+          proxy.$message.success(
             `${dialogData.title} -> [${deptInfo.deptName}] 成功！`,
           );
         } else {
-          ctx.$message.warning(
+          proxy.$message.warning(
             `${dialogData.title} -> [${deptInfo.deptName}] 失败！`,
           );
         }
@@ -181,9 +183,9 @@ export default {
     },
   },
   setup(props) {
-    const { ctx } = getCurrentInstance();
+    const { proxy } = getCurrentInstance();
     return {
-      ...useDeptOperateEffect(ctx, props.getDeptList),
+      ...useDeptOperateEffect(proxy, props.getDeptList),
     };
   },
 };

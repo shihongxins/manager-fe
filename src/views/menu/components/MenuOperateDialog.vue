@@ -83,14 +83,18 @@
 </template>
 
 <script>
-import { getCurrentInstance, reactive, toRaw } from 'vue';
+import {
+  getCurrentInstance, reactive, toRaw, inject,
+} from 'vue';
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @param {Function} getMenuList 重新加载页面表格数据的方法
  * @description 新增、编辑菜单数据的业务逻辑（弹窗）
  */
-const useMenuOperateEffect = (ctx, getMenuList) => {
+const useMenuOperateEffect = (proxy, getMenuList) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 弹窗与弹窗表单的数据
   const dialogData = reactive({
     // 下面是弹窗的表单数据
@@ -129,9 +133,9 @@ const useMenuOperateEffect = (ctx, getMenuList) => {
     // 改变弹窗显示状态
     dialogData.showDialog = show;
     // ❗❗❗❗弹窗改变结束并操作完 DOM 后，再才执行下面的任务
-    ctx.$nextTick(() => {
+    proxy.$nextTick(() => {
       // 清空弹窗的表单
-      ctx.$refs.operateForm.resetFields();
+      proxy.$refs.operateForm.resetFields();
       if (menuInfo !== undefined) {
         // 如果是添加菜单，那么父级菜单为 当前菜单的父级 加上 当前菜单
         if (action === 'add') {
@@ -155,20 +159,20 @@ const useMenuOperateEffect = (ctx, getMenuList) => {
   // 弹窗表单数据的提交
   const handleSubmitMenuOperate = () => {
     // 提交前 校验表单
-    ctx.$refs.operateForm.validate(async (valid) => {
+    proxy.$refs.operateForm.validate(async (valid) => {
       if (valid) {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
         const menuInfo = toRaw(dialogData);
-        const res = await ctx.$api.menuOperate(menuInfo);
+        const res = await $api.menuOperate(menuInfo);
         if (res === true) {
           // 关闭弹窗
           handleToggleDialogShow(false);
           // 重新加载表格
           getMenuList();
           // 弹出提示
-          ctx.$message.success(`${dialogData.title} -> [${menuInfo.menuName}] 成功！`);
+          proxy.$message.success(`${dialogData.title} -> [${menuInfo.menuName}] 成功！`);
         } else {
-          ctx.$message.warning(`${dialogData.title} -> [${menuInfo.menuName}] 失败！`);
+          proxy.$message.warning(`${dialogData.title} -> [${menuInfo.menuName}] 失败！`);
         }
       }
     });
@@ -195,9 +199,9 @@ export default {
     },
   },
   setup(props) {
-    const { ctx } = getCurrentInstance();
+    const { proxy } = getCurrentInstance();
     return {
-      ...useMenuOperateEffect(ctx, props.getMenuList),
+      ...useMenuOperateEffect(proxy, props.getMenuList),
     };
   },
 };

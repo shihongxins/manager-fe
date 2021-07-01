@@ -12,7 +12,7 @@ import ElementPlus from 'element-plus';
 import 'element-plus/lib/theme-chalk/index.css';
 
 // 引入 封装的 axios RESTful 请求方法，和所用到的 api 集合
-import { request } from './utils/request';
+// import { request } from './utils/request';
 import api from './api';
 
 // 引入自定义指令控制按钮权限
@@ -25,8 +25,13 @@ import App from './App.vue';
 
 const app = createApp(App);
 
-app.config.globalProperties.$requset = request;
-app.config.globalProperties.$api = api;
+// app.config.globalProperties.$requset = request;
+// app.config.globalProperties.$api = api;
+/**
+ * vue3 中不建议往 Vue 原型上挂载自定义方法，而应该使用依赖注入
+ * [vue 3之app.config.globalProperties的使用，ctx打包后指向错误](https://blog.csdn.net/MZS_ym/article/details/108866013)
+*/
+app.provide('$api', api);
 
 app.use(ElementPlus, { size: 'small' });
 app.use(router);

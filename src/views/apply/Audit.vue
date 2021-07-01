@@ -82,16 +82,18 @@
 
 <script>
 import {
-  getCurrentInstance, onMounted, reactive, ref,
+  getCurrentInstance, onMounted, reactive, ref, inject,
 } from 'vue';
 import utils from '@/utils/utils';
 import AuditLeaveDialog from './components/AuditLeaveDialog.vue';
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @description 休假数据表格的初始化业务逻辑（包括查询）
  */
-const useAuditTableInitEffect = (ctx) => {
+const useAuditTableInitEffect = (proxy) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 表格展示列项
   const tableColumns = [
     {
@@ -200,7 +202,7 @@ const useAuditTableInitEffect = (ctx) => {
   // 加载表格数据的方法
   const getLeaveList = async () => {
     const params = { ...pageData, ...query };
-    const { page, list } = await ctx.$api.getLeaveList(params);
+    const { page, list } = await $api.getLeaveList(params);
     if (page && list) {
       leaveList.value = list;
       pageData.total = page.total;
@@ -210,7 +212,7 @@ const useAuditTableInitEffect = (ctx) => {
   const handleQuerySubmit = (options) => {
     const { reset, pageNum, pageSize } = options;
     if (reset) {
-      ctx.$refs.queryForm.resetFields();
+      proxy.$refs.queryForm.resetFields();
     }
     pageData.pageNum = pageNum || 1;
     pageData.pageSize = pageSize || 10;
@@ -218,12 +220,12 @@ const useAuditTableInitEffect = (ctx) => {
   };
   // （调用子组件的方法）弹出查看、审核申请休假详情弹窗
   const showAuditLeaveDialog = (show, action, leaveInfo) => {
-    ctx.$refs.auditLeaveDialog.handleToggleDialogShow(show, action, leaveInfo);
+    proxy.$refs.auditLeaveDialog.handleToggleDialogShow(show, action, leaveInfo);
   };
   // “审核” 按钮是否显示
   const editable = (row) => (row
     && [1, 2].indexOf(row.applyState) > -1
-    && row.currentFlowUser?.userId === ctx.$store.state.userInfo?.userId);
+    && row.currentFlowUser?.userId === proxy.$store.state.userInfo?.userId);
   // 页面初始化的时候自动执行一次加载数据
   onMounted(() => {
     getLeaveList();
@@ -248,9 +250,9 @@ export default {
     AuditLeaveDialog,
   },
   setup() {
-    const { ctx } = getCurrentInstance();
+    const { proxy } = getCurrentInstance();
     return {
-      ...useAuditTableInitEffect(ctx),
+      ...useAuditTableInitEffect(proxy),
     };
   },
 };

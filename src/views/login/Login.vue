@@ -51,6 +51,7 @@ export default {
       },
     };
   },
+  inject: ['$api'],
   methods: {
     login() {
       this.onLogin = true;
@@ -69,8 +70,8 @@ export default {
           } else {
             this.$message.error('登录失败！');
           }
-          this.onLogin = false;
         }
+        this.onLogin = false;
       });
     },
   },

@@ -89,15 +89,17 @@
 
 <script>
 import {
-  getCurrentInstance, reactive, ref, toRaw, onMounted,
+  getCurrentInstance, reactive, ref, toRaw, onMounted, inject,
 } from 'vue';
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @param {Function} getUserList 重新加载页面表格数据的方法
  * @description 新增、编辑用户数据的业务逻辑（弹窗）
  */
-const useUserOperateEffect = (ctx, getUserList) => {
+const useUserOperateEffect = (proxy, getUserList) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 弹窗与弹窗表单的数据
   const dialogData = reactive({
     // 下面是弹窗的表单数据
@@ -131,9 +133,9 @@ const useUserOperateEffect = (ctx, getUserList) => {
     // 改变弹窗显示状态
     dialogData.showDialog = show;
     // ❗❗❗❗弹窗改变结束并操作完 DOM 后，再才执行下面的任务
-    ctx.$nextTick(() => {
+    proxy.$nextTick(() => {
       // 清空弹窗的表单
-      ctx.$refs.operateForm.resetFields();
+      proxy.$refs.operateForm.resetFields();
       if (show && action === 'edit') {
         // 如果是打开编辑，重新填充默认值
         dialogData.userId = userInfo.userId;
@@ -150,36 +152,36 @@ const useUserOperateEffect = (ctx, getUserList) => {
   // 弹窗表单数据的提交
   const handleSubmitUserOperate = () => {
     // 提交前 校验表单
-    ctx.$refs.operateForm.validate(async (valid) => {
+    proxy.$refs.operateForm.validate(async (valid) => {
       if (valid) {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
         const data = toRaw(dialogData);
         data.userEmail = `${data.userEmail.split('@')[0]}@manager.com`;
-        const res = await ctx.$api.userOperate(data);
+        const res = await $api.userOperate(data);
         if (res === true) {
           // 关闭弹窗
           handleToggleDialogShow(false);
           // 重新加载表格
           getUserList();
           // 弹出提示
-          ctx.$message.success(`${dialogData.title}成功！`);
+          proxy.$message.success(`${dialogData.title}成功！`);
         } else {
-          ctx.$message.warning(`${dialogData.title}失败！`);
+          proxy.$message.warning(`${dialogData.title}失败！`);
         }
       }
     });
   };
-  // 系统角色列表与部门列表的数据与加载方法。 TODO: 应该是一个系统级而非页面级方法，后续可能移到 HOME ，通过 vuex 交换
+  // 系统角色列表与部门列表的数据与加载方法。
   const roleList = ref([]);
   const deptList = ref([]);
   const getRoleAllList = async () => {
-    const list = await ctx.$api.getRoleAllList();
+    const list = await $api.getRoleAllList();
     if (list.length) {
       roleList.value = list;
     }
   };
   const getDeptList = async () => {
-    const list = await ctx.$api.getDeptList();
+    const list = await $api.getDeptList();
     if (list.length) {
       deptList.value = list;
     }
@@ -210,9 +212,9 @@ export default {
     },
   },
   setup(props) {
-    const { ctx } = getCurrentInstance();
+    const { proxy } = getCurrentInstance();
     return {
-      ...useUserOperateEffect(ctx, props.getUserList),
+      ...useUserOperateEffect(proxy, props.getUserList),
     };
   },
 };

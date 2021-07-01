@@ -79,16 +79,18 @@
 
 <script>
 import {
-  getCurrentInstance, onMounted, reactive, ref,
+  getCurrentInstance, onMounted, reactive, ref, inject,
 } from 'vue';
 import utils from '@/utils/utils';
 import RoleOperateDialog from './components/RoleOperateDialog.vue';
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @description 菜单数据表格的初始化业务逻辑（包括查询）
  */
-const useRoleTableInitEffect = (ctx) => {
+const useRoleTableInitEffect = (proxy) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 表格展示列项
   const tableColumns = [
     {
@@ -146,7 +148,7 @@ const useRoleTableInitEffect = (ctx) => {
   // 加载表格数据的方法
   const getRoleList = async () => {
     const params = { ...pageData, ...query };
-    const { page, list } = await ctx.$api.getRoleList(params);
+    const { page, list } = await $api.getRoleList(params);
     if (page && list) {
       roleList.value = list;
       pageData.total = page.total;
@@ -156,7 +158,7 @@ const useRoleTableInitEffect = (ctx) => {
   const handleQuerySubmit = (options) => {
     const { reset, pageNum, pageSize } = options;
     if (reset) {
-      ctx.$refs.queryForm.resetFields();
+      proxy.$refs.queryForm.resetFields();
     }
     pageData.pageNum = pageNum || 1;
     pageData.pageSize = pageSize || 10;
@@ -164,21 +166,21 @@ const useRoleTableInitEffect = (ctx) => {
   };
   // （调用子组件的方法）弹出编辑弹窗
   const showDialog = (show, action, roleInfo) => {
-    ctx.$refs.roleOperateDialog.handleToggleDialogShow(show, action, roleInfo);
+    proxy.$refs.roleOperateDialog.handleToggleDialogShow(show, action, roleInfo);
   };
   // 删除一项
   const handleSingleDel = async (row) => {
     if (row && row._id) {
-      const res = await ctx.$api.roleOperate({
+      const res = await $api.roleOperate({
         _id: row._id,
         roleName: row.roleName,
         action: 'delete',
       });
       if (res === true) {
-        ctx.$message.success('删除成功！');
+        proxy.$message.success('删除成功！');
         getRoleList();
       } else {
-        ctx.$message.error('删除失败！');
+        proxy.$message.error('删除失败！');
       }
     }
   };
@@ -186,7 +188,7 @@ const useRoleTableInitEffect = (ctx) => {
   const menuList = ref([]);
   // 加载表格数据的方法
   const getMenuList = async () => {
-    const list = await ctx.$api.getMenuList();
+    const list = await $api.getMenuList();
     if (list) {
       menuList.value = list;
     }
@@ -216,9 +218,9 @@ export default {
   },
   setup() {
     // 获取页面实例，供其他逻辑使用
-    const { ctx } = getCurrentInstance();
+    const { proxy } = getCurrentInstance();
     return {
-      ...useRoleTableInitEffect(ctx),
+      ...useRoleTableInitEffect(proxy),
     };
   },
 };

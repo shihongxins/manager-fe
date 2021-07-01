@@ -55,15 +55,19 @@
 </template>
 
 <script>
-import { getCurrentInstance, reactive, toRaw } from 'vue';
+import {
+  getCurrentInstance, reactive, toRaw, inject,
+} from 'vue';
 import utils from '@/utils/utils';
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @param {Function} getRoleList 重新加载页面表格数据的方法
  * @description 新增申请休假的业务逻辑（弹窗）
  */
-const useApplyLeaveEffect = (ctx, getLeaveList) => {
+const useApplyLeaveEffect = (proxy, getLeaveList) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 弹窗与弹窗表单的数据
   const dialogData = reactive({
     // 下面是弹窗的表单数据
@@ -104,31 +108,31 @@ const useApplyLeaveEffect = (ctx, getLeaveList) => {
     // 改变弹窗显示状态
     dialogData.showDialog = show;
     // ❗❗❗❗弹窗改变结束并操作完 DOM 后，再才执行下面的任务
-    ctx.$nextTick(() => {
+    proxy.$nextTick(() => {
       // 清空弹窗的表单 在显示之前不要修改任何除弹窗显示之外的任何 dialogData 字段，否则无法重置表单
-      ctx.$refs.operateForm.resetFields();
+      proxy.$refs.operateForm.resetFields();
     });
   };
   // 弹窗表单数据的提交
   const handleSubmitApplyLeave = () => {
     // 提交前 校验表单
-    ctx.$refs.operateForm.validate(async (valid) => {
+    proxy.$refs.operateForm.validate(async (valid) => {
       if (valid) {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
         const leaveInfo = toRaw(dialogData);
         leaveInfo.leaveDate.forEach((item, i) => {
           leaveInfo.leaveDate[i] = utils.formatterDateTime(item);
         });
-        const res = await ctx.$api.leaveOperate(leaveInfo);
+        const res = await $api.leaveOperate(leaveInfo);
         if (res === true) {
           // 关闭弹窗
           handleToggleDialogShow(false);
           // 重新加载表格
           getLeaveList();
           // 弹出提示
-          ctx.$message.success('提交申请休假成功！');
+          proxy.$message.success('提交申请休假成功！');
         } else {
-          ctx.$message.warning('提交申请休假失败');
+          proxy.$message.warning('提交申请休假失败');
         }
       }
     });
@@ -156,9 +160,9 @@ export default {
     },
   },
   setup(props) {
-    const { ctx } = getCurrentInstance();
+    const { proxy } = getCurrentInstance();
     return {
-      ...useApplyLeaveEffect(ctx, props.getLeaveList),
+      ...useApplyLeaveEffect(proxy, props.getLeaveList),
     };
   },
 };

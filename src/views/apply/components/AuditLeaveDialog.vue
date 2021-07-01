@@ -55,15 +55,17 @@
 
 <script>
 import {
-  computed, getCurrentInstance, reactive, toRaw,
+  computed, getCurrentInstance, reactive, toRaw, inject,
 } from 'vue';
 
 /**
- * @param {Object} ctx 页面实例对象
+ * @param {Object} proxy 页面实例对象
  * @param {Function} getRoleList 重新加载页面表格数据的方法
  * @description 查看，审核休假申请的业务逻辑（弹窗）
  */
-const useLeaveOperateEffect = (ctx, getLeaveList) => {
+const useLeaveOperateEffect = (proxy, getLeaveList) => {
+  // 依赖注入 $api
+  const $api = inject('$api');
   // 弹窗与弹窗表单的数据
   const dialogData = reactive({
     // 下面是弹窗的表单数据
@@ -90,12 +92,12 @@ const useLeaveOperateEffect = (ctx, getLeaveList) => {
   };
   // 表单数据的描述对照(计算属性)
   const leaveTypeDesc = computed(
-    () => ctx.leaveTypeList.filter(
+    () => proxy.leaveTypeList.filter(
       (item) => item.value === dialogData.leaveType,
     )[0]?.label,
   );
   const applyStateDesc = computed(
-    () => ctx.applyStateList.filter(
+    () => proxy.applyStateList.filter(
       (item) => item.value === dialogData.applyState,
     )[0]?.label,
   );
@@ -140,9 +142,9 @@ const useLeaveOperateEffect = (ctx, getLeaveList) => {
     // 改变弹窗显示状态
     dialogData.showDialog = show;
     // ❗❗❗❗弹窗改变结束并操作完 DOM 后，再才执行下面的任务
-    ctx.$nextTick(() => {
+    proxy.$nextTick(() => {
       // 清空弹窗的表单
-      ctx.$refs.operateForm.resetFields();
+      proxy.$refs.operateForm.resetFields();
       if (show) {
         // 如果是打开编辑，重新填充默认值
         dialogData._id = leaveInfo._id;
@@ -163,22 +165,22 @@ const useLeaveOperateEffect = (ctx, getLeaveList) => {
   // 弹窗表单数据的提交
   const handleSubmitApplyLeave = (auditAction) => {
     // 提交前 校验表单
-    ctx.$refs.operateForm.validate(async (valid) => {
+    proxy.$refs.operateForm.validate(async (valid) => {
       if (valid && auditAction) {
         // 手动修改数据的时候一定得转为非响应式对象然后拷贝一份，避免影响原始响应式数据
         const { _id, remark } = toRaw(dialogData);
-        const res = await ctx.$api.leaveAudit({ _id, remark, action: auditAction });
+        const res = await $api.leaveAudit({ _id, remark, action: auditAction });
         if (res === true) {
           // 关闭弹窗
           handleToggleDialogShow(false);
           // 重新加载表格
           getLeaveList();
           // 弹出提示
-          ctx.$message.success('提交审核 成功！');
+          proxy.$message.success('提交审核 成功！');
           // 刷新通知提示徽章
-          ctx.$api.getNoticeCount();
+          $api.getNoticeCount();
         } else {
-          ctx.$message.warning('提交审核 失败！');
+          proxy.$message.warning('提交审核 失败！');
         }
       }
     });
@@ -212,9 +214,9 @@ export default {
     },
   },
   setup(props) {
-    const { ctx } = getCurrentInstance();
+    const { proxy } = getCurrentInstance();
     return {
-      ...useLeaveOperateEffect(ctx, props.getLeaveList),
+      ...useLeaveOperateEffect(proxy, props.getLeaveList),
     };
   },
 };
