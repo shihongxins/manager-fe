@@ -5,6 +5,7 @@ const path = require('path');
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: 'manager-fe',
   server: {
     // host: '0.0.0.0',
     port: 8080,

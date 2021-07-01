@@ -239,7 +239,7 @@ export default {
   async getLeaveList(query) {
     let list = [];
     try {
-      list = await request.get('/leave/list', query, { isMock: false });
+      list = await request.get('/leave/list', query);
     } catch (e) {
       console.error(e);
       ElMessage.error('获取休假申请列表出错！');
@@ -249,7 +249,7 @@ export default {
   async leaveOperate(leaveInfo) {
     let res = false;
     try {
-      const data = await request.post('/leave/operate', leaveInfo, { isMock: false });
+      const data = await request.post('/leave/operate', leaveInfo);
       if (data && (data.deletedCount > 0 || data.nModified > 0 || data._id)) {
         res = true;
       }
@@ -262,7 +262,7 @@ export default {
   async leaveAudit(auditInfo) {
     let res = false;
     try {
-      const data = await request.post('/leave/audit', auditInfo, { isMock: false });
+      const data = await request.post('/leave/audit', auditInfo);
       if (data && (data.deletedCount > 0 || data.nModified > 0 || data._id)) {
         res = true;
       }
