@@ -165,7 +165,7 @@ const useAuditTableInitEffect = (ctx) => {
       width: 70,
       formatter(row, column, value) {
         // eslint-disable-next-line no-use-before-define
-        return applyStateList.filter((s) => s.value === value)[0].label;
+        return applyStateList.filter((s) => s.value === value)[0]?.label;
       },
     },
   ];
@@ -182,6 +182,7 @@ const useAuditTableInitEffect = (ctx) => {
     { label: '审批中', value: 2 },
     { label: '审批通过', value: 3 },
     { label: '审批驳回', value: 4 },
+    { label: '撤销作废', value: 5 },
   ]);
   // 表格数据
   const leaveList = ref([]);
